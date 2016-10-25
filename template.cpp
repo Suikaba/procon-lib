@@ -16,6 +16,7 @@
 #include <cmath>
 #include <utility>
 #include <tuple>
+#include <numeric>
 using namespace std;
 
 using ll = long long;
