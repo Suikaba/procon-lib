@@ -1,6 +1,3 @@
-#include <vector>
-#include <algorithm>
-#include <cmath>
 
 // ford-fulkerson
 struct edge {
