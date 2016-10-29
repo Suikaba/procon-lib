@@ -26,5 +26,5 @@ private:
     std::vector<long long> p[2];
 
     const std::array<long long, 2> mod;
-    static const long long base = 100000007LL;
+    static const long long base = 29LL;
 };
