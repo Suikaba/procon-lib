@@ -105,8 +105,8 @@ matrix <T> operator*(matrix<T> const& lhs, matrix<T> const& rhs) {
 
     matrix<T> ret(lhs.row_size(), rhs.column_size());
     for(int i=0; i<ret.row_size(); ++i) {
-        for(int j=0; j<ret.column_size(); ++j) {
-            for(int k=0; k<lhs.column_size(); ++k) {
+        for(int k=0; k<lhs.column_size(); ++k) {
+            for(int j=0; j<ret.column_size(); ++j) {
                 ret[i][j] = std::fma(lhs[i][k], rhs[k][j], ret[i][j]);
             }
         }
@@ -220,8 +220,8 @@ matrix<T> mul(matrix<T> const& a, matrix<T> const& b, long long M = mod) {
     assert("matrix mul: row and column size does not match" && a.column_size() == b.row_size());
     matrix<T> ret(R, C);
     for(int i=0; i<R; ++i) {
-        for(int j=0; j<C; ++j) {
-            for(int k=0; k<a.column_size(); ++k) {
+        for(int k=0; k<a.column_size(); ++k) {
+            for(int j=0; j<C; ++j) {
                 ret[i][j] = (ret[i][j] + ((a[i][k] * b[k][j]) % M)) % M;
             }
         }
