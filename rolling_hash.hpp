@@ -16,7 +16,7 @@ public:
     }
 
     // (l, r]
-    ll query(int l, int r, int i) {
+    long long query(int l, int r, int i) {
         return ((hs[i][r] - (__int128)hs[i][l]*p[i][r-l]) % mod[i] + mod[i]) % mod[i];
     }
 
