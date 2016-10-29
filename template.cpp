@@ -6,6 +6,7 @@
 #include <stack>
 #include <map>
 #include <string>
+#include <array>
 #include <deque>
 #include <iomanip>
 #include <bitset>
@@ -17,6 +18,7 @@
 #include <utility>
 #include <tuple>
 #include <numeric>
+#include <cassert>
 using namespace std;
 
 using ll = long long;
