@@ -20,6 +20,11 @@ public:
           row_(r),
           column_(c)
     {}
+    matrix(std::vector<std::vector<T>> const& v)
+        : v_(v),
+          row_(v.size()),
+          column_((v.size() == 0 ? 0 : v[0].size()))
+    {}
     matrix(matrix const&) = default;
     matrix(matrix&&) = default;
     matrix& operator=(matrix const&) = default;
@@ -107,7 +112,7 @@ matrix <T> operator*(matrix<T> const& lhs, matrix<T> const& rhs) {
     for(int i=0; i<ret.row_size(); ++i) {
         for(int k=0; k<lhs.column_size(); ++k) {
             for(int j=0; j<ret.column_size(); ++j) {
-                ret[i][j] = std::fma(lhs[i][k], rhs[k][j], ret[i][j]);
+                ret[i][j] += lhs[i][k] * rhs[k][j];
             }
         }
     }
@@ -126,6 +131,7 @@ matrix<T> transpose(matrix<T> const& m) {
     return ret;
 }
 
+// verified: AOJ2564
 template <typename T>
 int rank_matrix(matrix<T> a) {
     const int r = a.row_size(), c = a.column_size();
@@ -158,7 +164,7 @@ int rank_matrix(matrix<long double> a) {
         }
         for(int j=r+1; j<R; ++j) {
             for(int k=C-1; k>=i; --k) {
-                a[j][k] = std::fma(-a[r][k], a[j][i], a[j][k]);
+                a[j][k] += -a[r][k] * a[j][i];
             }
         }
         ++r;
@@ -213,9 +219,9 @@ matrix<T> make_identity_matrix(int n) {
     return ret;
 }
 
-// mod ver
+// mulptile mod ver
 template <typename T>
-matrix<T> mul(matrix<T> const& a, matrix<T> const& b, long long M = mod) {
+matrix<T> mul(matrix<T> const& a, matrix<T> const& b, long long M) {
     int R = a.row_size(), C = b.column_size();
     assert("matrix mul: row and column size does not match" && a.column_size() == b.row_size());
     matrix<T> ret(R, C);
@@ -244,7 +250,7 @@ matrix<T> pow(matrix<T> x, long long y) {
 }
 
 template <typename T>
-matrix<T> pow(matrix<T> x, long long y, long long M) {
+matrix<T> modpow(matrix<T> x, long long y, long long M) {
     assert("matrix pow: matrix is not square" && x.column_size() == x.row_size());
     matrix<T> ret = make_identity_matrix<T>(x.column_size());
     while(y > 0) {
@@ -257,5 +263,55 @@ matrix<T> pow(matrix<T> x, long long y, long long M) {
     return ret;
 }
 
+
+
+// LUP factorization(gauss)
+// verified: AOJ1328
+// Ax = b
+// note: A must be regular(non-singular)
+// return: x
+//         or size 0 vector (if x does not exist or not unique)
+vector<double> gauss_jordan(matrix<double>& A, std::vector<double> const& b) {
+    int n = A.row_size();
+    matrix<double> B(n, n+1);
+    for(int i=0; i<n; ++i) {
+        for(int j=0; j<n; ++j) {
+            B[i][j] = A[i][j];
+        }
+    }
+    for(int i=0; i<n; ++i) {
+        B[i][n] = b[i];
+    }
+
+    for(int i=0; i<n; ++i) {
+        int pivot = i;
+        for(int j=i; j<n; ++j) {
+            if(std::abs(B[j][i]) > std::abs(B[pivot][i])) {
+                pivot = j;
+            }
+        }
+        std::swap(B[i], B[pivot]);
+        if(std::abs(B[i][i]) < eps) {
+            return std::vector<double>();
+        }
+
+        for(int j=i+1; j<=n; ++j) {
+            B[i][j] /= B[i][i];
+        }
+        for(int j=0; j<n; ++j) {
+            if(i != j) {
+                for(int k=i+1; k<=n; ++k) {
+                    B[j][k] -= B[j][i] * B[i][k];
+                }
+            }
+        }
+    }
+
+    std::vector<double> x(n);
+    for(int i=0; i<n; ++i) {
+        x[i] = B[i][n];
+    }
+    return x;
+}
 
 
