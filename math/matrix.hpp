@@ -3,10 +3,10 @@
 namespace detail {
 
 bool is_zero(double d) {
-    return (std::abs(d) < eps);
+    return (std::abs(d) < 1e-9);
 }
 bool is_zero(long double d) {
-    return (std::abs(d) < eps);
+    return (std::abs(d) < 1e-9);
 }
 
 }
@@ -211,12 +211,12 @@ long double det(matrix<long double> a) {
 }
 
 template <typename T>
-matrix<T> make_identity_matrix(int n) {
-    matrix<T> ret(n, n);
+matrix<T> eye(int n) {
+    matrix<T> res(n, n);
     for(int i=0; i<n; ++i) {
-        ret[i][i] = 1;
+        res[i][i] = 1;
     }
-    return ret;
+    return res;
 }
 
 // mulptile mod ver
@@ -238,7 +238,7 @@ matrix<T> mul(matrix<T> const& a, matrix<T> const& b, long long M) {
 template <typename T>
 matrix<T> pow(matrix<T> x, long long y) {
     assert("matrix pow: matrix is not square" && x.column_size() == x.row_size());
-    matrix<T> ret = make_identity_matrix<T>(x.column_size());
+    matrix<T> ret = eye<T>(x.column_size());
     while(y > 0) {
         if(y & 1) {
             ret = ret * x;
@@ -252,7 +252,7 @@ matrix<T> pow(matrix<T> x, long long y) {
 template <typename T>
 matrix<T> modpow(matrix<T> x, long long y, long long M) {
     assert("matrix pow: matrix is not square" && x.column_size() == x.row_size());
-    matrix<T> ret = make_identity_matrix<T>(x.column_size());
+    matrix<T> ret = eye<T>(x.column_size());
     while(y > 0) {
         if(y & 1) {
             ret = mul(ret, x, M);
@@ -291,7 +291,7 @@ vector<double> gauss_jordan(matrix<double>& A, std::vector<double> const& b) {
             }
         }
         std::swap(B[i], B[pivot]);
-        if(std::abs(B[i][i]) < eps) {
+        if(std::abs(B[i][i]) < 1e-9) {
             return std::vector<double>();
         }
 
