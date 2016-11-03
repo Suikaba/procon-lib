@@ -148,7 +148,7 @@ matrix<T> transpose(matrix<T> const& m) {
     return ret;
 }
 
-// verified: AOJ2564
+// verified
 template <typename T>
 int rank_matrix(matrix<T> a) {
     const int r = a.row_size(), c = a.column_size();
@@ -283,7 +283,7 @@ matrix<T> modpow(matrix<T> x, long long y, long long M) {
 
 
 // LUP factorization(gauss)
-// verified: AOJ1328
+// verified
 // Ax = b
 // note: A must be regular(non-singular)
 // return: x
