@@ -315,3 +315,59 @@ vector<double> gauss_jordan(matrix<double>& A, std::vector<double> const& b) {
 }
 
 
+struct lu_data {
+    matrix<double> A;
+    std::vector<int> pi;
+};
+
+// LU decomposition 
+// A = LU
+// A: n * n
+// Verified
+lu_data lu_decomposition(matrix<double> A) {
+    std::vector<int> pi;
+    const int n = A.row_size();
+    for(int i=0; i<n; ++i) {
+        int pivot = i;
+        for(int j=i+1; j<n; ++j) {
+            if(std::fabs(A[pivot][i]) < std::fabs(A[j][i])) {
+                pivot = j;
+            }
+        }
+        pi.push_back(pivot);
+        std::swap(A[pivot], A[i]);
+        for(int j=i+1; j<n; ++j) {
+            for(int k=i+1; k<n; ++k) {
+                A[j][k] -= A[i][k] * A[j][i] / A[i][i];
+            }
+            A[j][i] /= A[i][i];
+        }
+    }
+    return lu_data{A, pi};
+}
+
+// solve Ax = LUx = b
+std::vector<double> lu_solve(lu_data LU, std::vector<double> b) {
+    matrix<double>& A = LU.A;
+    std::vector<int> &pi = LU.pi;
+    const int n = A.row_size();
+    for(int i=0; i<(int)pi.size(); ++i) {
+        std::swap(b[i], b[pi[i]]);
+    }
+    // set c = Ux
+    // solve Lc = b
+    // (assign: b[i] <- c[i])
+    for(int i=0; i<n; ++i) {
+        for(int j=0; j<i; ++j) {
+            b[i] -= A[i][j] * b[j];
+        }
+    }
+    // solve Ux = c
+    for(int i=n-1; i>=0; --i) {
+        for(int j=i+1; j<n; ++j) {
+            b[i] -= A[i][j] * b[j];
+        }
+        b[i] /= A[i][i];
+    }
+    return b;
+}
