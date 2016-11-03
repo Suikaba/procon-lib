@@ -58,6 +58,23 @@ public:
         return *this;
     }
 
+    bool operator==(matrix const& rhs) const {
+        if(row_ != rhs.row_size() || column_ != rhs.column_size()) {
+            return false;
+        }
+        for(int i=0; i<row_; ++i) {
+            for(int j=0; j<column_; ++j) {
+                if(std::abs(v_[i][j] - rhs[i][j]) > 1e-9) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    bool operator!=(matrix const& rhs) {
+        return !(*this == rhs);
+    }
+
     int row_size() const {
         return row_;
     }
