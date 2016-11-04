@@ -245,7 +245,7 @@ matrix<T> mul(matrix<T> const& a, matrix<T> const& b, long long M) {
     for(int i=0; i<R; ++i) {
         for(int k=0; k<a.column_size(); ++k) {
             for(int j=0; j<C; ++j) {
-                ret[i][j] = (ret[i][j] + ((a[i][k] * b[k][j]) % M)) % M;
+                ret[i][j] = (ret[i][j] + a[i][k] * b[k][j]) % M;
             }
         }
     }
