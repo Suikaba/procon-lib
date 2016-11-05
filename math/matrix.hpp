@@ -236,16 +236,15 @@ matrix<T> eye(int n) {
     return res;
 }
 
-// mulptile mod ver
 template <typename T>
-matrix<T> mul(matrix<T> const& a, matrix<T> const& b, long long M) {
+matrix<T> mul(matrix<T> const& a, matrix<T> const& b) {
     int R = a.row_size(), C = b.column_size();
     assert("matrix mul: row and column size does not match" && a.column_size() == b.row_size());
     matrix<T> ret(R, C);
     for(int i=0; i<R; ++i) {
         for(int k=0; k<a.column_size(); ++k) {
             for(int j=0; j<C; ++j) {
-                ret[i][j] = (ret[i][j] + a[i][k] * b[k][j]) % M;
+                ret[i][j] += a[i][k] * b[k][j];
             }
         }
     }
@@ -265,21 +264,6 @@ matrix<T> pow(matrix<T> x, long long y) {
     }
     return ret;
 }
-
-template <typename T>
-matrix<T> modpow(matrix<T> x, long long y, long long M) {
-    assert("matrix pow: matrix is not square" && x.column_size() == x.row_size());
-    matrix<T> ret = eye<T>(x.column_size());
-    while(y > 0) {
-        if(y & 1) {
-            ret = mul(ret, x, M);
-        }
-        x = mul(x, x, M);
-        y >>= 1;
-    }
-    return ret;
-}
-
 
 
 // LUP factorization(gauss)
