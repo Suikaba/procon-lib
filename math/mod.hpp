@@ -56,12 +56,11 @@ public:
         modulo res = (a * a) ^ (n / 2);
         return n % 2 ? res * a : res;
     }
-   
+
     // for C++11, enable_if_t -> typename enable_if::type
-    std::enable_if_t<IsPrime, modulo> operator/(modulo const& a) const {
+    typename std::enable_if<IsPrime, modulo>::type operator/(modulo const& a) const {
         return *this * modulo(inv(ll(a), M));
     }
-
 
 private:
     int n;
@@ -72,7 +71,7 @@ private:
     // x = (1 - 13y) / 5 + 13 (+13は正にしたいから)なので，こういうyがほしいが，
     // 先ほどの 3y %% 1 (mod 5) 解けば良い．これはつまり，inv(13%5, 5) である．
     // ゆえに，x = (1 - 13*inv(13%5, 5))/5 + 13 となる．
-    static std::enable_if_t<IsPrime, ll> inv(ll a, ll p) {
+    static typename std::enable_if<IsPrime, ll>::type inv(ll a, ll p) {
         return (a == 1 ? 1 : (1 - p*inv(p%a, a))/a + p);
     }
 };
