@@ -5,7 +5,7 @@ struct edge {
     int from, to;
     weight cost;
     bool operator<(edge const& rhs) const {
-        return cost < rhs.cost;
+        return cost > rhs.cost;
     }
 };
 
@@ -13,7 +13,7 @@ using edges = std::vector<edge>;
 using graph = std::vector<edges>;
 
 edges kruskal (int V, edges& es) {
-    std::sort(es.begin(), es.end());
+    std::sort(es.rbegin(), es.rend());
     union_find uf(V);
     edges res;
     for(int i=0; i<es.size(); ++i) {
