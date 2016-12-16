@@ -20,6 +20,10 @@ long double cross(point a, point b) {
 
 class segment {
 public:
+    segment()
+        : a(point(0, 0)),
+          b(point(0, 0))
+    {}
     segment(point a_, point b_)
         : a(a_), b(b_)
     {}
@@ -29,8 +33,11 @@ public:
 
 class line {
 public:
+    line()
+        : a(point(0, 0)), b(point(0, 0))
+    {}
     line(point a_, point b_)
-    : a(a_), b(b_)
+        : a(a_), b(b_)
     {}
     line(segment s)
         : a(s.a), b(s.b)
@@ -41,6 +48,9 @@ public:
 
 class circle {
 public:
+    circle()
+        : p(point(0, 0)), r(0)
+    {}
     circle(point p_, long double r_)
         : p(p_), r(r_)
     {}
@@ -115,6 +125,27 @@ long double dist_ss(segment s, segment t) {
     long double d1 = std::min(dist_sp(s, t.a), dist_sp(s, t.b));
     long double d2 = std::min(dist_sp(t, s.a), dist_sp(t, s.b));
     return std::min(d1, d2);
+}
+
+
+std::vector<point> is_cc(circle const& c1, circle const& c2) {
+    std::vector<point> res;
+    long double d = std::abs(c1.p - c2.p);
+    long double rc = (d * d + c1.r * c1.r - c2.r * c2.r) / (2 * d);
+    long double dfr = c1.r * c1.r - rc * rc;
+    if(std::abs(dfr) < eps) {
+        dfr = 0.0;
+    } else if(dfr < 0.0) {
+        return res;
+    }
+
+    long double rs = std::sqrt(dfr);
+    point diff = (c2.p - c1.p) / d;
+    res.push_back(c1.p + diff * point(rc, rs));
+    if(dfr != 0.0) {
+        res.push_back(c1.p + diff * point(rc, -rs));
+    }
+    return res;
 }
 
 
