@@ -58,16 +58,12 @@ public:
         //std::mt19937 mt(rnd());
         //std::uniform_int_distribution<> randlr(l, r-1);
         //const int samp_size = std::min(r-l, 10);
-        //std::vector<std::pair<int, data<T, Dim>>> sample(samp_size);
+        //std::vector<data<T, Dim>> sample(samp_size);
         //for(int i=0; i<samp_size; ++i) {
-        //    int idx = randlr(mt);
-        //    sample[i] = std::make_pair(idx, ds[idx]);
+        //    sample[i] = ds[randlr(mt)];
         //}
-        //axis_sorter<T, Dim> sorter(axis);
-        //std::sort(sample.begin(), sample.end(), [&sorter](auto const& p1, auto const& p2) {
-        //    return sorter(p1.second, p2.second);
-        //});
-        //int nth = sample[samp_size/2].first;
+        //std::sort(sample.begin(), sample.end(), axis_sorter<T, Dim>(axis));
+        //int nth = sample[samp_size/2].index;
         int nth = (l + r) / 2;
         std::nth_element(ds.begin() + l, ds.begin()+nth, ds.begin()+r, axis_sorter<T, Dim>(axis));
         val = ds[nth];
@@ -97,7 +93,7 @@ public:
         }
         if(as(amin, val) || val.v[axis] == amin.v[axis]) {
             if(left) {
-                std::vector<T> tmp(left->query(amin, amax));
+                std::vector<data<T, Dim>> tmp(left->query(amin, amax));
                 res.insert(res.end(), tmp.begin(), tmp.end());
             }
         }
