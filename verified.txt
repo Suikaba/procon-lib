@@ -1,0 +1,3 @@
+
+structure
+-- kdtree.cpp <- aoj 0585: Nearest Two Points
