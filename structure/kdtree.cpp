@@ -75,6 +75,35 @@ public:
         right = make_kdtree(ds, nth+1, r, depth+1);
     }
 
+    std::vector<data<T, Dim>> query(data<T, Dim> const& amin, data<T, Dim> const& amax) {
+        std::vector<data<T, Dim>> res;
+        bool aok = true;
+        for(int i=0; i<Dim; ++i) {
+            if(amin.v[i] <= val.v[i] && val.v[i] <= amax.v[i]) {
+                continue;
+            }
+            aok = false;
+            break;
+        }
+        if(aok) {
+            res.push_back(val);
+        }
+        axis_sorter<T, Dim> as(axis);
+        if(as(val, amax) || val.v[axis] == amax.v[axis]) {
+            if(right) {
+                std::vector<data<T, Dim>> tmp(right->query(amin, amax));
+                res.insert(res.end(), tmp.begin(), tmp.end());
+            }
+        }
+        if(as(amin, val) || val.v[axis] == amin.v[axis]) {
+            if(left) {
+                std::vector<T> tmp(left->query(amin, amax));
+                res.insert(res.end(), tmp.begin(), tmp.end());
+            }
+        }
+        return res;
+    }
+
     T nearest_neighbor(data<T, Dim> const& p) {
         T res = dist(val, p);
         if(res == 0) { // point(p) equals point(val)
