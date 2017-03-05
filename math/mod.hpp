@@ -63,7 +63,7 @@ public:
     }
 
 private:
-    int n;
+    ll n;
     // ax %% 1 (mod p)
     // ex: 5x %% 1 (mod 13)
     // つまり 5x + 13y = 1
