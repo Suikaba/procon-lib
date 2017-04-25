@@ -14,7 +14,7 @@ public:
         : n(size(dat_.size())),
           id(id_),
           merge(merge_),
-          dat(size(dat_.size()), id_)
+          dat(size(dat_.size())*2, id_)
     {
         for(int i=0; i<dat_.size(); ++i) {
             dat[i+n-1] = dat_[i];
