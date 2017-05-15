@@ -17,7 +17,7 @@ public:
         if(x == y) {
             return false;
         } else {
-            if(par_[x] < par_[y]) { // size(x) > size(y)
+            if(par_[x] < par_[y]) {
                 par_[x] += par_[y];
                 par_[y] = x;
             } else {
