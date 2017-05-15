@@ -1,3 +1,6 @@
 
 structure
 -- kdtree.cpp <- aoj 0585: Nearest Two Points
+
+math
+-- golden_section_search.hpp : ARC054 B - ムーアの法則
