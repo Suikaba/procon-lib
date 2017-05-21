@@ -19,7 +19,7 @@ public:
           log_V(0),
           depth_(V, 0)
     {
-        for(int v = 1; v < V; v <<= 1) {
+        for(int v=V; v>0; v /= 2) {
             ++log_V;
         }
         parent.assign(log_V, std::vector<int>(V, 0));
