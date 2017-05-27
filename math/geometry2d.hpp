@@ -1,8 +1,15 @@
 
+using ld = long double;
+
+constexpr ld eps = 1e-8;
+
+
 namespace geometry2d {
 
 
 using point = std::complex<long double>;
+using polygon = std::vector<point>;
+
 
 bool eq(long double a, long double b) {
     return (std::abs(a-b) < eps);
@@ -146,6 +153,20 @@ std::vector<point> is_cc(circle const& c1, circle const& c2) {
         res.push_back(c1.p + diff * point(rc, -rs));
     }
     return res;
+}
+
+// 0 -> on, 1 -> in, 2 -> out
+int is_in_polygon(polygon const& poly, point p) {
+    int N = poly.size();
+    ld sum = 0;
+    for(int i=0; i<N; ++i) {
+        point p1 = poly[i], p2 = poly[(i+1)%N];
+        if(isis_sp(segment(p1, p2), p)) {
+            return 0;
+        }
+        sum += arg((p2 - p) / (p1 - p));
+    }
+    return eq(sum, 0) ? 2 : 1;
 }
 
 
