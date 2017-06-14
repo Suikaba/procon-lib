@@ -169,6 +169,11 @@ int is_in_polygon(polygon const& poly, point p) {
     return eq(sum, 0) ? 2 : 1;
 }
 
+point reflection(line const& l, point p) {
+    auto pro = proj(l, p);
+    return p + (pro - p) + (pro - p);
+}
+
 
 } // namespace geometry2d
 
