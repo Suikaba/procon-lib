@@ -1,0 +1,28 @@
+<html>
+  <head>
+    <title>visualizer</title>
+  </head>
+  
+  <script>
+    function line(x, y, a, b) {
+      cv.beginPath();
+      cv.moveTo(x, y);
+      cv.lineTo(a, b);
+      cv.stroke();
+    }
+    function circle(x, y, r) {
+      cv.beginPath();
+      cv.arc(x, y, r, 0, 7, 0);
+      cv.stroke();
+    }
+    window.onload = function() {
+      cv = document.getElementById('c').getContext('2d');
+      document.getElementById('s').src = 'data.js?';
+    };
+  </script>
+  
+  <body>
+    <canvas id="c" width="800" height="800" style="border:1px solid #000;"></canvas>
+    <script id="s"></script>
+  </body> 
+</html>
