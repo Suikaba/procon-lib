@@ -15,7 +15,6 @@ bool eq(long double a, long double b) {
     return (std::abs(a-b) < eps);
 }
 
-
 long double dot(point a, point b) {
     return std::real(std::conj(a) * b);
 }
@@ -172,6 +171,40 @@ int is_in_polygon(polygon const& poly, point p) {
 point reflection(line const& l, point p) {
     auto pro = proj(l, p);
     return p + (pro - p) + (pro - p);
+}
+
+ld area(polygon const& p) {
+    const int N = p.size();
+    ld res = 0;
+    for(int i=0; i<N; ++i) {
+        res += cross(p[i], p[(i+1)%N]);
+    }
+    return res / 2;
+}
+
+// left side
+polygon convex_cut(polygon const& p, line l) {
+    const int N = p.size();
+    polygon res;
+    for(int i=0; i<N; ++i) {
+        auto a = p[i], b = p[(i+1)%N];
+        if(ccw(l.a, l.b, a) != -1) {
+            res.push_back(a);
+        }
+        if(ccw(l.a, l.b, a) * ccw(l.a, l.b, b) < 0) {
+            res.push_back(is_ll(line(a, b), l));
+        }
+    }
+    return res;
+}
+
+line separate(point const& p1, point const& p2) {
+    assert(p1 != p2);
+    auto m = (p1 + p2) * point(0.5, 0);
+    line res;
+    res.a = m + (m - p1) * point(0, 1);
+    res.b = m + (m - p1) * point(0, -1);
+    return res;
 }
 
 
