@@ -198,6 +198,33 @@ polygon convex_cut(polygon const& p, line l) {
     return res;
 }
 
+polygon convex_hull(vector<point> ps) {
+    sort(ps.begin(), ps.end(), [&](point const& p1, point const& p2) {
+        if(real(p1) == real(p2)) {
+            return imag(p1) < imag(p2);
+        }
+        return real(p1) < real(p2);
+    });
+    const int n = ps.size();
+    int k = 0;
+    polygon qs(2*n);
+    for(int i=0; i<n; ++i) {
+        while(k > 1 && ccw(qs[k-2], qs[k-1], ps[i]) <= 0) {
+            k--;
+        }
+        qs[k++] = ps[i];
+    }
+    for(int i=n-2, t = k; i>=0; --i) {
+        while(k > t && ccw(qs[k-2], qs[k-1], ps[i]) <= 0) {
+            k--;
+        }
+        qs[k++] = ps[i];
+    }
+    qs.resize(k-1);
+    return qs;
+}
+
+
 line separate(point const& p1, point const& p2) {
     assert(p1 != p2);
     auto m = (p1 + p2) * point(0.5, 0);
