@@ -81,7 +81,7 @@ bool isis_ll(line l, line m) {
 }
 
 bool isis_ls(line l, segment s) {
-    return (cross(l.b - l.a, s.a - l.a) * cross(l.b - l.a, s.b - s.a) < eps);
+    return (cross(l.b - l.a, s.a - l.a) * cross(l.b - l.a, s.b - l.a) < eps);
 }
 
 bool isis_lp(line l, point p) {
