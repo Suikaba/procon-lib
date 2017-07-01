@@ -1,9 +1,3 @@
-//#include <memory>
-//#include <vector>
-//#include <random>
-//#include <array>
-//#include <limits>
-//#include <algorithm>
 
 template<typename T, int Dim = 2>
 struct data {
@@ -54,16 +48,6 @@ public:
         if(l >= r) {
             return;
         }
-        //std::random_device rnd;
-        //std::mt19937 mt(rnd());
-        //std::uniform_int_distribution<> randlr(l, r-1);
-        //const int samp_size = std::min(r-l, 10);
-        //std::vector<data<T, Dim>> sample(samp_size);
-        //for(int i=0; i<samp_size; ++i) {
-        //    sample[i] = ds[randlr(mt)];
-        //}
-        //std::sort(sample.begin(), sample.end(), axis_sorter<T, Dim>(axis));
-        //int nth = sample[samp_size/2].index;
         int nth = (l + r) / 2;
         std::nth_element(ds.begin() + l, ds.begin()+nth, ds.begin()+r, axis_sorter<T, Dim>(axis));
         val = ds[nth];
