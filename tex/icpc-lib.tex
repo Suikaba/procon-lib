@@ -1,0 +1,89 @@
+\documentclass[dvipdfmx, 11pt]{jsarticle}
+\usepackage[top=25truemm,bottom=21truemm,left=20truemm,right=20truemm]{geometry}
+\usepackage{caption}
+
+%\usepackage{newtxtext,newtxmath}
+\usepackage{array}
+
+\usepackage{xcolor, colortbl}
+
+%\newcommand{\tikzmark}[2]{\tikz[remember picture] \node (#1) {$#2$};}
+
+\usepackage{listings, jlisting}
+
+\lstset{%
+  language=C++,
+  breaklines=true,
+  basicstyle={\ttfamily},
+  %identifierstyle={\ttfamily \color[rgb]{}},
+  frame=lines,
+  columns=[l]{fullflexible},
+  keywordstyle={\bfseries \color[rgb]{0.7, 0.2, 0.2}},
+  stringstyle={\ttfamily \color[rgb]{0,0,1}},
+  commentstyle={\ttfamily \color[rgb]{0.3, 0.6, 0.3}},
+  lineskip=-0.3zw,
+  keepspaces=true,
+  showstringspaces=false,
+  showtabs=false,
+  %numbers=left,
+  %numberstyle={\scriptsize},
+  framexleftmargin=7.7mm,
+  %xleftmargin=7.7mm,
+  tabsize=4,
+}
+\lstset{
+  morekeywords={constexpr,noexcept,static_assert,decltype,nullptr}
+}
+
+
+\newcommand\cxx{C\texttt{++}}
+\newcommand\csharp{C\texttt{\#}}
+
+
+\begin{document}
+
+\section{Graph}
+
+\subsection{bipartite matching}
+\lstinputlisting{../graph/bipartite_matching.hpp}
+
+\subsection{dinic.hpp}
+\lstinputlisting{../graph/dinic.hpp}
+
+\subsection{Ford-Fulkerson}
+\lstinputlisting{../graph/ford-fulkerson.hpp}
+
+\subsection{LCA.hpp}
+\lstinputlisting{../graph/LCA.cpp}
+
+\subsection{lowlink.hpp}
+\lstinputlisting{../graph/lowlink.hpp}
+
+\subsection{min\_cost\_flow.hpp}
+\lstinputlisting{../graph/min_cost_flow.hpp}
+
+\subsection{Strongly Connected Component}
+\lstinputlisting{../graph/strongly_connected_component.hpp}
+
+
+\section{Math}
+
+\subsection{Matrix}
+\lstinputlisting{../math/matrix.hpp}
+
+\subsection{Geometry 2-d}
+\lstinputlisting{../math/geometry2d.hpp}
+
+\subsection{Golden Section Search}
+\lstinputlisting{../math/golden_section_search.hpp}
+
+
+\section{structure}
+
+\subsection{fenwick tree}
+\lstinputlisting{../structure/fenwick_tree.hpp}
+
+\subsection{kdtree}
+\lstinputlisting{../structure/kdtree.cpp}
+
+\end{document}
