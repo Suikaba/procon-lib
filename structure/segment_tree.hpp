@@ -1,73 +1,74 @@
 
-template <typename T>
+// example:
+//struct rmq {
+//    using type = int;
+//    static type id() {
+//        return std::numeric_limits<int>::max();
+//    }
+//    static type op(type const& l, type const& r) {
+//        return std::min(l, r);
+//    }
+//};
+
+template<typename Monoid>
 class segment_tree {
-    using func_t = std::function<T(T, T)>;
+    using T = typename Monoid::type;
 
 public:
-    segment_tree(int n_, T id_, func_t merge_)
-        : n(size(n_)),
-          id(id_),
-          merge(merge_),
-          dat(size(n_)*2, id_)
-    {}
-    segment_tree(vector<T> const& dat_, T id_, func_t merge_)
-        : n(size(dat_.size())),
-          id(id_),
-          merge(merge_),
-          dat(size(dat_.size())*2, id_)
+    segment_tree(std::vector<T> const& init)
+        : sz(init.size()),
+          n(expand(init.size()))
     {
-        for(int i=0; i<dat_.size(); ++i) {
-            dat[i+n-1] = dat_[i];
-        }
-        for(int i=n-2; i>=0; --i) {
-            dat[i] = merge(dat[i*2+1], dat[i*2+2]);
+        dat.assign(n*2, Monoid::id());
+        std::copy(begin(init), end(init), begin(dat) + n);
+        for(int i = n - 1; i >= 0; --i) {
+            dat[i] = Monoid::op(dat[i * 2], dat[i * 2 + 1]);
         }
     }
 
-    void update(int k, T val) {
-        k += n-1;
-        dat[k] = val;
-        while(k > 0) {
-            k = (k-1)/2;
-            dat[k] = merge(dat[k*2+1], dat[k*2+2]);
+    segment_tree(int const n, T const& init = Monoid::id())
+        : segment_tree(std::vector<T>(n, init))
+    {}
+
+    void update(int p, T val) {
+        assert(0 <= p && p < size);
+        dat[p += n] = val;
+        while(p /= 2) {
+            dat[p] = Monoid::op(dat[p * 2], dat[p * 2 + 1]);
         }
     }
-    void add(int k, T val) {
-        k += n-1;
-        dat[k] += val;
-        while(k > 0) {
-            k = (k-1)/2;
-            dat[k] = merge(dat[k*2+1], dat[k*2+2]);
-        }
-    }
+
     // [l, r)
-    T find(int l, int r) {
-        return sub(l, r, 0, 0, n);
+    T query(int l, int r) const {
+        assert(0 <= l && l < r && r <= size);
+        l += n;
+        r += n;
+        T res1 = Monoid::id(),
+          res2 = Monoid::id();
+        while(l != r) {
+            if(l & 1) {
+                res1 = Monoid::op(res1, dat[l++]);
+            }
+            if(r & 1) {
+                res2 = Monoid::op(dat[--r], res2);
+            }
+            l /= 2;
+            r /= 2;
+        }
+        return Monoid::op(res1, res2);
+    }
+
+    int size() const {
+        return sz;
     }
 
 private:
-    int size(int n) {
-        int res = 1;
-        while(res < n) {
-            res *= 2;
-        }
-        return res;
-    }
-    T sub(int l, int r, int node, int lb, int ub) {
-        if(ub <= l || r <= lb) {
-            return id;
-        }
-        if(l <= lb && ub <= r) {
-            return dat[node];
-        }
-        T vl = sub(l, r, node*2+1, lb, (lb + ub)/2);
-        T vr = sub(l, r, node*2+2, (lb+ub)/2, ub);
-        return merge(vl, vr);
+    int expand(int n) const {
+        return n == 1 ? n : expand((n + 1) / 2) * 2;
     }
 
 private:
+    const int sz;
     const int n;
-    const T id;
-    func_t merge;
-    vector<T> dat;
+    std::vector<T> dat;
 };
