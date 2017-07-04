@@ -31,7 +31,7 @@ public:
     {}
 
     void update(int p, T val) {
-        assert(0 <= p && p < size);
+        assert(0 <= p && p < sz);
         dat[p += n] = val;
         while(p /= 2) {
             dat[p] = Monoid::op(dat[p * 2], dat[p * 2 + 1]);
@@ -40,7 +40,7 @@ public:
 
     // [l, r)
     T query(int l, int r) const {
-        assert(0 <= l && l < r && r <= size);
+        assert(0 <= l && l < r && r <= sz);
         l += n;
         r += n;
         T res1 = Monoid::id(),
