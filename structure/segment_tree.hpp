@@ -40,7 +40,7 @@ public:
 
     // [l, r)
     T query(int l, int r) const {
-        assert(0 <= l && l < r && r <= sz);
+        assert(0 <= l && l <= r && r <= sz);
         l += n;
         r += n;
         T res1 = Monoid::id(),
