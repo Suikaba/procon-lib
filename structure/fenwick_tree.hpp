@@ -1,3 +1,5 @@
+
+// 0-indexed
 template <typename T>
 class fenwick_tree {
 public:
