@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-using namespace std;
 
 using ld = long double;
 constexpr ld eps = 1e-8;
@@ -77,6 +76,7 @@ point operator*(ld a, point const& b) {
     return b*a;
 }
 
+
 bool eq(ld a, ld b) {
     return (std::abs(a - b) < eps);
 }
@@ -109,6 +109,10 @@ point proj(line l, point p) {
 }
 
 
+ld dist_lp(line const& l, point const& p) {
+    return abs(p - proj(l, p));
+}
+
 bool isis_sps(sphere const& sp, segment const& s) {
     auto a = s.a - sp.p;
     auto b = s.b - sp.p;
@@ -126,6 +130,25 @@ bool isis_sps(sphere const& sp, segment const& s) {
         return true;
     }
     return false;
+}
+
+std::vector<point> is_spl(sphere const& sp, line const& l) {
+    point x = proj(l, sp.p);
+    if(abs(x - sp.p) - sp.r > eps) {
+        return std::vector<point>();
+    }
+    if(-eps <= abs(x - sp.p)) {
+        std::vector<point> res = {x};
+        return res;
+    }
+    point vec = (l.a - l.b) * (1 / abs(l.a - l.b));
+    ld t = sqrt(sp.r * sp.r - norm(x - sp.p));
+    std::vector<point> res = {x - vec * t, x + vec * t};
+    return res;
+}
+
+point reflection(line const& l, point const& p) {
+    return p + (proj(l, p) - p) * 2.0;
 }
 
 } // namespace geometry3d
