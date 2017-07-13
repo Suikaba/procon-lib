@@ -2,6 +2,7 @@
 using ld = long double;
 
 constexpr ld eps = 1e-8;
+constexpr ld pi = std::acos(-1.0);
 
 
 namespace geometry2d {
@@ -165,7 +166,7 @@ int is_in_polygon(polygon const& poly, point p) {
         }
         sum += arg((p2 - p) / (p1 - p));
     }
-    return eq(sum, 0) ? 2 : 1;
+    return eq(sum) < pi / 2 ? 2 : 1;
 }
 
 point reflection(line const& l, point p) {
