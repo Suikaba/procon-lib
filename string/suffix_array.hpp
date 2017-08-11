@@ -4,8 +4,8 @@ public:
     suffix_array(std::string const& s_)
         : length(s_.length()),
           s(s_),
-          sa(s.length()+1),
-          rank(s.length()+1)
+          sa(s.length() + 1),
+          rank(s.length() + 1)
     {
         for(int i = 0; i <= length; ++i) {
             sa[i] = i;
@@ -24,7 +24,7 @@ public:
         for(k = 1; k <= length; k *= 2) {
             sort(sa.begin(), sa.end(), compare_sa);
 
-            std::vector<int> tmp(length+1);
+            std::vector<int> tmp(length + 1);
             tmp[sa[0]] = 0;
             for(int i = 1; i <= length; ++i) {
                 tmp[sa[i]] = tmp[sa[i - 1]] + (compare_sa(sa[i - 1], sa[i]) ? 1 : 0);
@@ -37,6 +37,10 @@ public:
 
     std::vector<int> get() const {
         return sa;
+    }
+
+    std::string get_string() const {
+        return s;
     }
 
     bool contain(std::string const& t) {
@@ -83,4 +87,33 @@ private:
     std::vector<int> sa;
     std::vector<int> rank;
 };
+
+
+std::vector<int> construct_lcp(suffix_array const& SA) {
+    auto s = SA.get_string();
+    const int n = s.size();
+    auto sa = SA.get();
+    std::vector<int> rank(n + 1);
+    for(int i = 0; i <= n; ++i) {
+        rank[sa[i]] = i;
+    }
+
+    int h = 0;
+    std::vector<int> lcp(n);
+    for(int i = 0; i < n; ++i) {
+        int j = sa[rank[i] - 1];
+
+        if(h > 0) {
+            h--;
+        }
+        for(; j + h < n && i + h < n; ++h) {
+            if(s[j + h] != s[i + h]) {
+                break;
+            }
+        }
+        lcp[rank[i] - 1] = h;
+    }
+
+    return lcp;
+}
 
