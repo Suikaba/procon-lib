@@ -3,7 +3,7 @@
 //struct rmq {
 //    using type = int;
 //    static type id() {
-//        return std::numeric_limits<int>::max();
+//        return std::numeric_limits<type>::max();
 //    }
 //    static type op(type const& l, type const& r) {
 //        return std::min(l, r);
