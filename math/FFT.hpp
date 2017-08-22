@@ -1,5 +1,3 @@
-#include <bits/stdc++.h>
-using namespace std;
 
 constexpr double pi = std::acos(-1.0);
 
@@ -59,21 +57,3 @@ std::vector<std::complex<data>> convolution(std::vector<std::complex<data>> x, s
     return x;
 }
 
-
-using namespace std;
-
-int main() {
-    int N;
-    cin >> N;
-    vector<complex<data>> A(N + 1), B(N + 1);
-    for(int i = 1; i <= N; ++i) {
-        double a, b;
-        cin >> a >> b;
-        A[i] = complex<data>(a, 0);
-        B[i] = complex<data>(b, 0);
-    }
-    auto res = convolution(A, B);
-    for(int i = 1; i <= 2*N; ++i) {
-        cout << (long long)(real(res[i]) + 0.1) << endl;
-    }
-}
