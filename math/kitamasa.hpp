@@ -1,82 +1,59 @@
 
+// M が固定で，速度が必要なら，M をグローバルに constexpr で定義するとよい．
 class kitamasa {
 public:
-    // d: coefficient
-    kitamasa(std::vector<long long> const& d_, long long m = 1e9+7)
+    // d: 係数
+    kitamasa(std::vector<long long> const& d_, long long m = 1e9 + 7)
         : k(d_.size()),
           d(d_),
-          res(d_.size(), 0),
-          res_2k(2*k-1)
           M(m)
-    {
-        // [0, k)
-        for(int i=0; i<k; ++i) {
-            res_2k[i].resize(k, 0);
-            res_2k[i][i] = d[i];
-        }
-        // [k, k+1)
-        res_2k[k].resize(k, 0);
-        std::copy(d.begin(), d.end(), res_2k[k].begin());
+    {}
 
-        // [k+1, 2k-1)
-        std::copy(d.begin(), d.end(), res.begin());
-        for(int i=k+1; i<2*k-1; ++i) {
-            res_2k[i].resize(k, 0);
-            inc();
-            for(int j=0; j<k; ++j) {
-                res_2k[i][j] = res[j];
-            }
+    void inc(std::vector<long long>& v) {
+        std::rotate(v.begin(), v.begin() + (k - 1), v.begin() + k);
+        long long l = v[0];
+        v[0] = 0;
+        for(int i = 0; i < k; ++i) {
+            (v[i] += d[i] * l) %= M;
         }
     }
-
-    void inc() {
-        std::rotate(res.begin(), res.begin()+(k-1), res.begin()+k);
-        long long l = res[0];
-        res[0] = 0;
-        for(int i=0; i<k; ++i) {
-            res[i] += d[i] * l;
-            res[i] %= M;
-        }
-    }
-    void dbl() { 
-        std::vector<long long> buf(2*k-1, 0);
-        for(int i=0; i<k; ++i) {
-            for(int j=0; j<k; ++j) {
-                buf[i+j] += res[i]*res[j];
-                buf[i+j] %= M;
+    void dbl(std::vector<long long>& v) { 
+        auto buf = v;
+        std::vector<long long> res(k);
+        for(int i = 0; i < k; ++i) {
+            for(int j = 0; j < k; ++j) {
+                (res[j] += buf[j] * v[i]) %= M;
             }
+            inc(buf);
         }
-        for(int i=k; i<k*2-1; ++i) {
-            for(int j=0; j<k; ++j) {
-                buf[j] += buf[i]*res_2k[i][j];
-                buf[j] %= M;
-            }
-        }
-        std::copy(buf.begin(), buf.begin()+k, res.begin());
+        v = std::move(res);
     }
 
     // calc a_n
-    long long execute(long long n) const {
-        std::fill(res.begin(), res.end(), 0);
+    long long calc(long long n) {
+        std::vector<long long> res(k);
         res[0] = 1;
-        for(int i=62; i>=0; --i) { // sometimes i=32 ok
-            dbl();
+        int j = 63;
+        while(!(n & (1 << j))) {
+            --j;
+        }
+        for(int i = j + 1; i >= 0; --i) {
+            dbl(res);
             if(n & (1LL << i)) {
-                inc();
+                inc(res);
             }
         }
 
         long long ans = 0;
-        for(int i=0; i<k; ++i) {
-            ans += res[i]*d[i];
-            ans %= M;
+        for(int i = 0; i < k; ++i) {
+            (ans += res[i] * d[i]) %= M;
         }
         return ans;
     }
 
 private:
     int k;
-    std::vector<long long> d, res;
-    std::vector<std::vector<long long>> res_2k;
-    long long M;
+    std::vector<long long> d;
+    long long const M = 1e9 + 7;
 };
+
