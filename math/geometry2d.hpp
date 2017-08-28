@@ -166,7 +166,7 @@ int is_in_polygon(polygon const& poly, point p) {
         }
         sum += arg((p2 - p) / (p1 - p));
     }
-    return eq(sum) < pi / 2 ? 2 : 1;
+    return std::abs(sum) < pi / 2 ? 2 : 1;
 }
 
 point reflection(line const& l, point p) {
