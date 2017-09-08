@@ -1,6 +1,8 @@
 
-structure
--- kdtree.cpp <- aoj 0585: Nearest Two Points
+[structure]
+・kdtree.cpp -> AOJ 0585 Nearest Two Points
+・wavelet_matrix
+  -- quantile -> ACPC 2014 Day2 I Hard Beans
 
-math
--- golden_section_search.hpp : ARC054 B - ムーアの法則
+[math]
+・golden_section_search.hpp -> ARC054 B - ムーアの法則
