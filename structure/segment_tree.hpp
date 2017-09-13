@@ -64,6 +64,7 @@ public:
 
 private:
     int expand(int n) const {
+        assert(n >= 1);
         return n == 1 ? n : expand((n + 1) / 2) * 2;
     }
 
