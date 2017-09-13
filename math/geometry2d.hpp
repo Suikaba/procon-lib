@@ -16,12 +16,27 @@ bool eq(long double a, long double b) {
     return (std::abs(a-b) < eps);
 }
 
+bool comp(point a, point b) {
+    return (std::real(a - b) * 1.347589 + std::imag(a - b)) > 0;
+}
+
 long double dot(point a, point b) {
     return std::real(std::conj(a) * b);
 }
 
 long double cross(point a, point b) {
     return std::imag(std::conj(a) * b);
+}
+
+std::vector<point> unique(std::vector<point> ps) {
+    std::sort(std::begin(ps), std::end(ps), comp);
+    std::vector<point> res;
+    for(auto& p : ps) {
+        if(res.empty() || abs(res.back() - p) > eps) {
+            res.push_back(p);
+        }
+    }
+    return res;
 }
 
 
@@ -108,6 +123,20 @@ point is_ll(line s, line t) {
     point sv = s.b - s.a, tv = t.b - t.a;
     assert(cross(sv, tv) != 0);
     return s.a + sv * cross(tv, t.a - s.a) / cross(tv, sv);
+}
+
+point is_ss(segment s1, segment s2) {
+    assert(isis_ss(s1, s2));
+    point sv = s1.b - s1.a, tv = s2.b - s2.a;
+    if(cross(sv, tv) == 0) {
+        if(std::abs(s1.a - s2.a) < eps || std::abs(s1.a - s2.b) < eps) {
+            return s1.a;
+        } else {
+            return s1.b;
+        }
+    } else {
+        return is_ll(line(s1), line(s2));
+    }
 }
 
 long double dist_lp(line l, point p) {
@@ -199,8 +228,8 @@ polygon convex_cut(polygon const& p, line l) {
     return res;
 }
 
-polygon convex_hull(vector<point> ps) {
-    sort(ps.begin(), ps.end(), [&](point const& p1, point const& p2) {
+polygon convex_hull(std::vector<point> ps) {
+    std::sort(ps.begin(), ps.end(), [&](point const& p1, point const& p2) {
         if(real(p1) == real(p2)) {
             return imag(p1) < imag(p2);
         }
@@ -233,6 +262,40 @@ line separate(point const& p1, point const& p2) {
     res.a = m + (m - p1) * point(0, 1);
     res.b = m + (m - p1) * point(0, -1);
     return res;
+}
+
+
+struct edge {
+    int from, to;
+    ld cost;
+};
+
+using edges = std::vector<edge>;
+using graph = std::vector<edges>;
+
+void add_edge(graph& g, int from, int to, ld cost) {
+    g[from].push_back(edge{from, to, cost});
+    g[to].push_back(edge{to, from, cost});
+}
+
+graph segment_arrangement(std::vector<segment> const& s, std::vector<point> const& p) {
+    int m = s.size();
+    int n = p.size();
+    graph g(n);
+    for(int i = 0; i < m; ++i) {
+        std::vector<std::pair<ld, int>> v;
+        for(int j = 0; j < n; ++j) {
+            if(isis_sp(s[i], p[j])) {
+                v.emplace_back(std::abs(s[i].a - p[j]), j);
+            }
+        }
+        std::sort(std::begin(v), std::end(v));
+        for(int j = 0; j < (int)v.size() - 1; ++j) {
+            int src = v[j].second, dest = v[j + 1].second;
+            add_edge(g, src, dest, std::abs(p[src] - p[dest]));
+        }
+    }
+    return g;
 }
 
 
