@@ -12,7 +12,7 @@ void add_edge(graph& g, int from, int to) {
 
 int scc(graph& G, std::vector<int>& cmp) {
     int V = G.size();
-    std::vector<vector<int>> g(V), rg(V);
+    std::vector<std::vector<int>> g(V), rg(V);
     std::vector<bool> used(V, false);
     std::vector<int> vs;
     cmp.resize(V);
@@ -55,7 +55,7 @@ int scc(graph& G, std::vector<int>& cmp) {
     return k;
 }
 
-vector<vector<int>> build_graph(graph const& g, vector<int> const& cmp, int K) {
+std::vector<std::vector<int>> build_graph(graph const& g, std::vector<int> const& cmp, int K) {
     int V = g.size();
     std::vector<std::set<int>> s(K);
     std::vector<std::vector<int>> res(K);
