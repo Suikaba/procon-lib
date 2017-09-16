@@ -4,5 +4,8 @@
 ・wavelet_matrix
   -- quantile -> ACPC 2014 Day2 I Hard Beans
 
+[graph]
+minimum_spanning_arborescence.hpp -> AOJ GRL_2_B
+
 [math]
 ・golden_section_search.hpp -> ARC054 B - ムーアの法則
