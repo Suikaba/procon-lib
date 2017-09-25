@@ -9,3 +9,6 @@ minimum_spanning_arborescence.hpp -> AOJ GRL_2_B
 
 [math]
 ・golden_section_search.hpp -> ARC054 B - ムーアの法則
+
+geometry2d
+  -- tangent_cp -> AOJ 2697 Runner and Sniper 

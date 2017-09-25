@@ -184,6 +184,24 @@ std::vector<point> is_cc(circle const& c1, circle const& c2) {
     return res;
 }
 
+std::vector<line> tangent_cp(circle c, point p) {
+    std::vector<line> res;
+    point v = c.p - p;
+    ld d = std::abs(v), len = std::sqrt(std::norm(v) - c.r * c.r);
+    if(std::isnan(len)) {
+        return res;
+    }
+    point v1 = v * point(len / d, c.r / d);
+    point v2 = v * point(len / d, -c.r / d);
+    res.push_back(line(p, p + v1));
+    if(len < eps) {
+        return res;
+    }
+    res.push_back(line(p, p + v2));
+    return res;
+}
+
+
 // 0 -> on, 1 -> in, 2 -> out
 int is_in_polygon(polygon const& poly, point p) {
     int N = poly.size();
