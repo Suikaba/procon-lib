@@ -16,15 +16,15 @@ void add_edge(graph& g, int from, int to, weight cap) {
 }
 
 void bfs(graph& g, std::vector<int>& level, int s) {
-    for(int i=0; i<level.size(); ++i) {
+    for(int i = 0; i < (int)level.size(); ++i) {
         level[i] = -1;
     }
     level[s] = 0;
-    std::queue<weight> que;
+    std::queue<int> que;
     que.push(s);
     while(!que.empty()) {
         int v = que.front(); que.pop();
-        for(int i=0; i<g[v].size(); ++i) {
+        for(int i = 0; i < (int)g[v].size(); ++i) {
             edge& e = g[v][i];
             if(e.cap > 0 && level[e.to] < 0) {
                 level[e.to] = level[v] + 1;
@@ -38,10 +38,10 @@ weight dfs(graph& g, std::vector<int>& level, std::vector<int>& iter, int v, int
     if(v == t) {
         return f;
     }
-    for(int& i=iter[v]; i<g[v].size(); ++i) {
+    for(int& i = iter[v]; i < (int)g[v].size(); ++i) {
         edge& e = g[v][i];
         if(e.cap > 0 && level[v] < level[e.to]) {
-            int d = dfs(g, level, iter, e.to, t, std::min(f, e.cap));
+            weight d = dfs(g, level, iter, e.to, t, std::min(f, e.cap));
             if(d > 0) {
                 e.cap -= d;
                 g[e.to][e.rev].cap += d;
@@ -52,18 +52,17 @@ weight dfs(graph& g, std::vector<int>& level, std::vector<int>& iter, int v, int
     return 0;
 }
 
-// verified
 weight max_flow(graph& g, int s, int t) {
     weight flow = 0;
     std::vector<int> level(g.size(), -1);
     std::vector<int> iter(g.size(), 0);
-    int INF = 1e9;
+    weight INF = 1e9;
     while(true) {
         bfs(g, level, s);
         if(level[t] < 0) {
             return flow;
         }
-        for(int i=0; i<iter.size(); ++i) {
+        for(int i = 0; i < (int)iter.size(); ++i) {
             iter[i] = 0;
         }
         weight f;
