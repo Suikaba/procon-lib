@@ -3,6 +3,7 @@
 ・kdtree.cpp -> AOJ 0585 Nearest Two Points
 ・wavelet_matrix
   -- quantile -> ACPC 2014 Day2 I Hard Beans
+・segment_tree2d -> AOJ 1068 School of Killifish
 
 [graph]
 minimum_spanning_arborescence.hpp -> AOJ GRL_2_B
