@@ -93,7 +93,7 @@ public:
     wavelet_matrix(std::vector<T> const& data) {
         length = data.size();
         max_val = *std::max_element(std::begin(data), std::end(data));
-        for(bit_size = 0; T(1) << bit_size <= max_val; ++bit_size);
+        for(bit_size = 0; 1LL << bit_size <= max_val; ++bit_size);
         dicts.assign(bit_size, length);
         mids.assign(bit_size, 0);
         std::vector<T> buf1(data), buf2(length);
