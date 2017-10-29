@@ -15,6 +15,8 @@ public:
     {}
 
     void insert(T val) {
+        // when you do not want multiset but set, insert below:
+        // if(find(val)) return;
         insert(root, val, B - 1);
     }
 
