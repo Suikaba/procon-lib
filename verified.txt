@@ -5,6 +5,7 @@
   -- quantile -> ACPC 2014 Day2 I Hard Beans
   -- rank_* -> AOJ 2674 Disordered Data Detection
 ・segment_tree2d -> AOJ 1068 School of Killifish
+・fenwick_tree2d -> Codeforces Round #404 (Div. 2) E. Anton and Permutation
 
 [graph]
 minimum_spanning_arborescence.hpp -> AOJ GRL_2_B
