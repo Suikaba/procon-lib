@@ -16,3 +16,6 @@ minimum_spanning_arborescence.hpp -> AOJ GRL_2_B
 
 geometry2d
   -- tangent_cp -> AOJ 2697 Runner and Sniper 
+
+[string]
+・aho_corasick -> JAG Asia 2017 H - Separate String
