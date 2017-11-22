@@ -1,8 +1,8 @@
 
 class aho_corasick {
     struct PMA {
-        std::weak_ptr<PMA> fail;
-        std::vector<std::shared_ptr<PMA>> next;
+        PMA* fail;
+        std::vector<std::unique_ptr<PMA>> next;
         std::vector<int> accept;
 
         PMA()
@@ -12,42 +12,41 @@ class aho_corasick {
 
 public:
     aho_corasick(std::vector<std::string> const& ts)
-        : K(ts.size()), root(std::make_shared<PMA>())
+        : K(ts.size()), root(std::make_unique<PMA>())
     {
-        root->fail = root;
+        root->fail = root.get();
         for(int i = 0; i < K; ++i) {
             PMA* t = root.get();
             for(auto cc : ts[i]) {
                 int c = cc - alphabet_base;
                 if(!t->next[c]) {
-                    t->next[c] = std::make_shared<PMA>();
+                    t->next[c] = std::make_unique<PMA>();
                 }
                 t = t->next[c].get();
             }
             t->accept.push_back(i);
         }
 
-        std::queue<std::shared_ptr<PMA>> que;
+        std::queue<PMA*> que;
         for(int c = 0; c < alphabets; ++c) {
             if(root->next[c]) {
-                root->next[c]->fail = root;
-                que.push(root->next[c]);
+                root->next[c]->fail = root.get();
+                que.push(root->next[c].get());
             }
         }
         while(!que.empty()) {
-            auto t = que.front();
+            PMA* t = que.front();
             que.pop();
             for(int c = 0; c < alphabets; ++c) {
                 if(t->next[c]) {
-                    que.push(t->next[c]);
-                    // assert(!t->fail.expired());
-                    auto r = t->fail.lock();
-                    while(!r->next[c] && r != root) {
-                        r = r->fail.lock();
+                    que.push(t->next[c].get());
+                    PMA* r = t->fail;
+                    while(!r->next[c] && r != root.get()) {
+                        r = r->fail;
                     }
-                    auto& nxt = r->next[c];
-                    if(!nxt) { // root
-                        nxt = root;
+                    PMA* nxt = r->next[c].get();
+                    if(nxt == nullptr) { // root
+                        nxt = root.get();
                     }
                     t->next[c]->fail = nxt;
                     for(auto ac : nxt->accept) {
@@ -65,7 +64,7 @@ public:
         for(int i = 0; i < (int)s.size(); ++i) {
             int c = s[i] - alphabet_base;
             while(!now->next[c] && now != root.get()) {
-                now = now->fail.lock().get();
+                now = now->fail;
             }
             now = now->next[c].get();
             if(now == nullptr) {
