@@ -1,4 +1,3 @@
-
 using graph = std::vector<std::vector<int>>;
 
 bool dfs(graph const& g, int v, std::vector<int>& match, std::vector<bool>& used) {
@@ -19,7 +18,7 @@ int bipartite_matching(graph const& g) {
     std::vector<int> match(V, -1);
     std::vector<bool> used(V);
     int res = 0;
-    for(int v=0; v<V; ++v) {
+    for(int v = 0; v < V; ++v) {
         if(match[v] < 0) {
             std::fill(used.begin(), used.end(), false);
             if(dfs(g, v, match, used)) {
@@ -29,4 +28,3 @@ int bipartite_matching(graph const& g) {
     }
     return res;
 }
-
