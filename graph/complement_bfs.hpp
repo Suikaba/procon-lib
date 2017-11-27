@@ -1,8 +1,3 @@
-
-constexpr int INF = 1e9;
-
-using pii = std::pair<int, int>;
-
 std::vector<int> complement_bfs(std::vector<std::vector<int>> const& g, int s) {
     const int n = g.size();
     std::vector<int> dist(n, INF);
@@ -37,4 +32,3 @@ std::vector<int> complement_bfs(std::vector<std::vector<int>> const& g, int s) {
 
     return dist;
 }
-
