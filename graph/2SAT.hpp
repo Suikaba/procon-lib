@@ -1,20 +1,14 @@
-
 class two_SAT {
 public:
     two_SAT(int n)
-        : V(2 * n),
-          N(n),
-          g(2*n),
-          rg(2*n),
-          used(2*n),
-          cmp(2*n)
+        : V(2 * n), N(n), g(2 * n), rg(2 * n), used(2 * n), cmp(2 * n)
     {}
 
+    // example: x_2 | !x_5 -> add_closure(2, 1, 5, 0)
     void add_closure(int i, bool bi, int j, bool bj) {
-        add_edge(i+N*bi, j+N*!bj);
-        add_edge(j+N*bj, i+N*!bi);
+        add_edge(i + N * bi, j + N * !bj);
+        add_edge(j + N * bj, i + N * !bi);
     }
-
     void add_edge(int from, int to) {
         g[from].push_back(to);
         rg[to].push_back(from);
@@ -23,7 +17,7 @@ public:
     std::vector<bool> solve() {
         std::fill(used.begin(), used.end(), false);
         vs.clear();
-        for(int v=0; v<V; ++v) {
+        for(int v = 0; v < V; ++v) {
             if(!used[v]) {
                 dfs(v);
             }
@@ -37,13 +31,13 @@ public:
             }
         }
         vector<bool> res;
-        for(int i=0; i<N; ++i) {
-            if(cmp[i] == cmp[i+N]) {
+        for(int i = 0; i < N; ++i) {
+            if(cmp[i] == cmp[i + N]) {
                 return res;
             }
         }
-        for(int i=0; i<N; ++i) {
-            res.push_back(cmp[i] > cmp[N+i]);
+        for(int i = 0; i < N; ++i) {
+            res.push_back(cmp[i] > cmp[N + i]);
         }
         return res;
     }
