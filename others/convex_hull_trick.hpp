@@ -1,4 +1,3 @@
-
 class convex_hull_trick {
     using T = long long;
 
@@ -43,4 +42,3 @@ public:
 private:
     std::deque<T> a, b; // functions
 };
-
