@@ -10,7 +10,7 @@
 
 [graph]
 ・strongly_connected_components -> AOJ GRL_3_C
-minimum_spanning_arborescence.hpp -> AOJ GRL_2_B
+・minimum_spanning_arborescence.hpp -> AOJ GRL_2_B
 ・bfs01.hpp -> ARC084 D - Small Multiple
 
 [math]
