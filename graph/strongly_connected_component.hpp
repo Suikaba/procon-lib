@@ -1,4 +1,3 @@
-
 struct edge {
     int from, to;
 };
@@ -16,7 +15,7 @@ int scc(graph& G, std::vector<int>& cmp) {
     std::vector<bool> used(V, false);
     std::vector<int> vs;
     cmp.resize(V);
-    for(int i=0; i<V; ++i) {
+    for(int i = 0; i < V; ++i) {
         for(auto e : G[i]) {
             g[i].push_back(e.to);
             rg[e.to].push_back(i);
@@ -40,14 +39,14 @@ int scc(graph& G, std::vector<int>& cmp) {
             }
         }
     };
-    for(int v=0; v<V; ++v) {
+    for(int v = 0; v < V; ++v) {
         if(!used[v]) {
             dfs(v);
         }
     }
     std::fill(used.begin(), used.end(), false);
     int k = 0;
-    for(int i=vs.size()-1; i>=0; --i) {
+    for(int i = vs.size() - 1; i >= 0; --i) {
         if(!used[vs[i]]) {
             rdfs(vs[i], k++);
         }
@@ -59,12 +58,12 @@ std::vector<std::vector<int>> build_graph(graph const& g, std::vector<int> const
     int V = g.size();
     std::vector<std::set<int>> s(K);
     std::vector<std::vector<int>> res(K);
-    for(int i=0; i<V; ++i) {
+    for(int i = 0; i < V; ++i) {
         for(auto e : g[i]) {
             s[cmp[i]].insert(cmp[e.to]);
         }
     }
-    for(int i=0; i<K; ++i) {
+    for(int i = 0; i < K; ++i) {
         for(auto j : s[i]) {
             if(i != j) {
                 res[i].push_back(j);
@@ -73,4 +72,3 @@ std::vector<std::vector<int>> build_graph(graph const& g, std::vector<int> const
     }
     return res;
 }
-
