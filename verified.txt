@@ -19,4 +19,5 @@ geometry2d
   -- tangent_cp -> AOJ 2697 Runner and Sniper 
 
 [string]
+・rolling_hash -> AOJ 2444 Substring
 ・aho_corasick -> JAG Asia 2017 H - Separate String

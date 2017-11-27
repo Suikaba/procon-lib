@@ -1,39 +1,28 @@
-
-// 1-indexed
-// s[1...n]
 class rolling_hash {
+    using ll = long long;
 public:
     rolling_hash(std::string const& s)
-        : n(s.size()),
-          mod({999999937LL, 1000000007LL})
+        : n(s.size()), hs1(n + 1), hs2(n + 1), p1(n + 1, 1), p2(n + 1, 1)
     {
-        for(int i = 0; i < 2; ++i) {
-            hs[i].resize(n + 1);
-            p[i].resize(n + 1);
-            hs[i][0] = 0;
-            p[i][0] = 1;
-            for(int j = 0; j < n; ++j) {
-                hs[i][j + 1] = (hs[i][j] * base + s[j]) % mod[i];
-                p[i][j + 1] = p[i][j] * base % mod[i];
-            }
+        for(int i = 0; i < n; ++i) {
+            hs1[i + 1] = (hs1[i] * b1 + s[i]) % mod1;
+            hs2[i + 1] = (hs2[i] * b2 + s[i]) % mod2;
+            p1[i + 1] = p1[i] * b1 % mod1;
+            p2[i + 1] = p2[i] * b2 % mod2;
         }
     }
 
-    // s[i...]
-    long long query(int idx, int i) const {
-        return hs[i][idx];
-    }
-    // s[l + 1...r]
-    long long query(int l, int r, int i) const {
-        return ((hs[i][r] - hs[i][l] * p[i][r - l]) % mod[i] + mod[i]) % mod[i];
+    std::pair<ll, ll> query(int l, int r) const {
+        return std::make_pair(((hs1[r] - hs1[l] * p1[r - l]) % mod1 + mod1) % mod1,
+                              ((hs2[r] - hs2[l] * p2[r - l]) % mod2 + mod2) % mod2);
     }
 
 private:
-    int n;
-    std::vector<long long> hs[2];
-    std::vector<long long> p[2];
-
-    const std::array<long long, 2> mod;
-    static const long long base = 29LL;
+    const int n;
+    std::vector<ll> hs1, hs2, p1, p2;
+    static const ll b1 = 17LL;
+    static const ll b2 = 19LL;
+    static const ll mod1 = 999999937LL;
+    static const ll mod2 = 1000000007LL;
 };
 
