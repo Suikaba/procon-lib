@@ -24,6 +24,7 @@
 
 [others]
 ・convex_hull_trick -> AOJ 2725 Live Programming
+・slide_min -> AOJ DPL_1_G
 
 [string]
 ・rolling_hash -> AOJ 2444 Substring
