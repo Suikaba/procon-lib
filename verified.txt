@@ -12,6 +12,7 @@
 ・bfs01.hpp -> ARC084 D - Small Multiple
 ・bipartite_matching -> AOJ GRL_7_A
 ・complement_bfs -> AtCoder みんプロ 2017 本戦 E - 瞬間移動装置
+・max_clique -> CODE THANKS FESTIVAL2017 G - Mixture Drug
 ・minimum_spanning_arborescence.hpp -> AOJ GRL_2_B
 ・strongly_connected_components -> AOJ GRL_3_C
 ・two_SAT -> Codeforces Round #141 (Div. 2) E
