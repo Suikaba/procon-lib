@@ -36,7 +36,7 @@ public:
     // [y1, y2) x [x1, x2)
     std::pair<ll, ll> query(int y1, int x1, int y2, int x2) const {
         std::pair<ll, ll> res(0, 0);
-        for(int i = 0; i < 1; ++i) { // workaround
+        for(int i = 0; i < 2; ++i) {
             auto& r = (i == 0 ? res.first : res.second);
             r = (hs[i][y2][x2] - hs[i][y2][x1] * p[i][i][x2 - x1] % M[i] + M[i]) % M[i];
             r = (r - hs[i][y1][x2] * p[!i][i][y2 - y1] % M[i] + M[i]) % M[i];
