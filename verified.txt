@@ -29,5 +29,6 @@
 ・slide_min -> AOJ DPL_1_G
 
 [string]
-・rolling_hash -> AOJ 2444 Substring
 ・aho_corasick -> JAG Asia 2017 H - Separate String
+・rolling_hash -> AOJ 2444 Substring
+・rolling_hash_2d -> AOJ 1312 Where's Wally
