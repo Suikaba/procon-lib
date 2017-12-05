@@ -19,6 +19,7 @@
 
 [math]
 ・euler_phi -> AOJ NTL_1_D
+・extgcd -> AOJ NTL_1_E
 ・FFT -> ATC001 C - 高速フーリエ変換
 ・golden_section_search.hpp -> ARC054 B - ムーアの法則
 ・geometry2d
