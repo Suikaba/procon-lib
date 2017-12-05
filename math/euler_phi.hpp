@@ -1,4 +1,4 @@
-int euler_phi(int n) {
+ll euler_phi(ll n) {
     int res = n;
     for(int i = 2; i * i <= n; ++i) {
         if(n % i == 0) {
