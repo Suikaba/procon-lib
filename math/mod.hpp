@@ -1,4 +1,3 @@
-
 template <int M, bool IsPrime = false>
 class modulo {
     using ll = long long;
@@ -11,21 +10,11 @@ public:
             n = (n % M + M) % M;
         }
     }
-    modulo(ll m) {
-        if(m >= M) {
-            m %= M;
-        } else if(m < 0) {
-            m = (m % M + M) % M;
-        }
-        n = m;
-    }
+    modulo(ll m) : modulo(int(m % M)) {}
 
-    explicit operator int() const {
-        return n;
-    }
-    explicit operator ll() const {
-        return n;
-    }
+    explicit operator int() const { return n; }
+    explicit operator ll() const { return n; }
+
     bool operator==(modulo const& a) const {
         return n == a.n;
     }
@@ -57,50 +46,41 @@ public:
         return n % 2 ? res * a : res;
     }
 
-    // for C++11, enable_if_t -> typename enable_if::type
     typename std::enable_if<IsPrime, modulo>::type operator/(modulo const& a) const {
         return *this * modulo(inv(ll(a), M));
     }
 
 private:
     ll n;
-    // ax %% 1 (mod p)
-    // ex: 5x %% 1 (mod 13)
-    // つまり 5x + 13y = 1
-    // 両辺mod5を取れば，13y %% 1 (mod 5) つまり 3y %% 1 (mod 5)になる．
-    // x = (1 - 13y) / 5 + 13 (+13は正にしたいから)なので，こういうyがほしいが，
-    // 先ほどの 3y %% 1 (mod 5) 解けば良い．これはつまり，inv(13%5, 5) である．
-    // ゆえに，x = (1 - 13*inv(13%5, 5))/5 + 13 となる．
     static typename std::enable_if<IsPrime, ll>::type inv(ll a, ll p) {
-        return (a == 1 ? 1 : (1 - p*inv(p%a, a))/a + p);
+        return (a == 1 ? 1 : (1 - p * inv(p % a, a)) / a + p);
     }
 };
 
 template <int M, bool IsPrime>
 modulo<M, IsPrime> operator+(modulo<M, IsPrime> lhs, modulo<M, IsPrime> const& rhs) {
-    lhs += rhs;
-    return lhs;
+    return lhs += rhs;
 }
 template <int M, bool IsPrime>
 modulo<M, IsPrime> operator-(modulo<M, IsPrime> lhs, modulo<M, IsPrime> const& rhs) {
-    lhs -= rhs;
-    return lhs;
+    return lhs -= rhs;
 }
 template <int M, bool IsPrime>
 modulo<M, IsPrime> operator*(modulo<M, IsPrime> lhs, modulo<M, IsPrime> const& rhs) {
-    lhs *= rhs;
-    return lhs;
+    return lhs *= rhs;
 }
 
+constexpr int MOD = 1000000007;
+
 // sw == false -> inv
-template <int M>
+template <int M = MOD>
 modulo<M, true> fact(int n, bool sw = true) {
     static std::vector<modulo<M, true>> v1 = {1}, v2 = {1};
     if(n >= (int)v1.size()) {
         const int from = v1.size(), to = n + 1024;
         v1.reserve(to);
         v2.reserve(to);
-        for(int i=from; i<to; ++i) {
+        for(int i = from; i < to; ++i) {
             v1.push_back(v1.back() * modulo<M, true>(i));
             v2.push_back(v2.back() / modulo<M, true>(i));
         }
@@ -108,15 +88,12 @@ modulo<M, true> fact(int n, bool sw = true) {
     return sw ? v1[n] : v2[n];
 }
 
-template <int M>
+template <int M = MOD>
 modulo<M, true> comb(int a, int b) {
     if(b < 0 || b > a) {
         return fact<M>(0);
     }
-    return fact<M>(a, true) * fact<M>(b, false) * fact<M>(a-b, false);
+    return fact<M>(a, true) * fact<M>(b, false) * fact<M>(a - b, false);
 }
 
-
-const int MOD = 1000000007;
 using mod = modulo<MOD, true>;
-
