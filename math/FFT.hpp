@@ -2,9 +2,9 @@ constexpr double pi = std::acos(-1.0);
 
 using data = std::complex<double>;
 
-// v のサイズは必ず 2 のべき乗であること．
-std::vector<data> fft_impl(std::vector<data> v, double theta) {
+std::vector<data> fft(std::vector<data> v, bool inv = false) {
     int const n = v.size();
+    double theta = 2 * pi / n * (inv ? -1 : 1);
     for(int m = n; m >= 2; m >>= 1) {
         int mh = m >> 1;
         data theta_i(0, theta);
@@ -25,15 +25,10 @@ std::vector<data> fft_impl(std::vector<data> v, double theta) {
             swap(v[i], v[j]);
         }
     }
+    if(inv) {
+        for(auto& x : v) x /= n;
+    }
     return v;
-}
-
-std::vector<data> fft(std::vector<data> v) {
-    return fft_impl(std::move(v), 2 * pi / v.size());
-}
-
-std::vector<data> inverse_fft(std::vector<data> v) {
-    return fft_impl(std::move(v), -2 * pi / v.size());
 }
 
 std::vector<data> convolution(std::vector<data> x, std::vector<data> y) {
@@ -47,9 +42,6 @@ std::vector<data> convolution(std::vector<data> x, std::vector<data> y) {
     for(int i = 0; i < sz; ++i) {
         x[i] *= y[i];
     }
-    x = inverse_fft(std::move(x));
-    for(auto& xx : x) {
-        xx /= sz;
-    }
+    x = fft(std::move(x), true);
     return x;
 }
