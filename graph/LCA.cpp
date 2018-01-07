@@ -1,4 +1,3 @@
-
 struct edge {
     int from, to;
 };
@@ -7,40 +6,21 @@ using edges = std::vector<edge>;
 using graph = std::vector<edges>;
 
 void add_edge(graph& g, int from, int to) {
-    g[from].push_back((edge){from, to});
-    g[to].push_back((edge){to, from});
+    g[from].push_back(edge{from, to});
+    g[to].push_back(edge{to, from});
 }
 
-
-class lca {
+class lowest_common_ancestor {
 public:
-    lca(graph& g, int root)
-        : V(g.size()),
-          log_V(0),
-          depth_(V, 0)
+    lowest_common_ancestor(graph const& g, int root)
+        : n(g.size()), log_n(std::ceil(std::log2(g.size())) + 1),
+          depth_(n), parent(log_n, std::vector<int>(n, -1))
     {
-        for(int v=V; v>0; v /= 2) {
-            ++log_V;
-        }
-        parent.assign(log_V, std::vector<int>(V, 0));
         dfs(g, root, -1, 0);
-        for(int k=0; k+1 < log_V; ++k) {
-            for(int v=0; v<V; ++v) {
-                if(parent[k][v] < 0) {
-                    parent[k+1][v] = -1;
-                } else {
-                    parent[k+1][v] = parent[k][parent[k][v]];
-                }
-            }
-        }
-    }
-
-    void dfs(graph const& g, int v, int p, int d) {
-        parent[0][v] = p;
-        depth_[v] = d;
-        for(int i=0; i<g[v].size(); ++i) {
-            if(g[v][i].to != p) {
-                dfs(g, g[v][i].to, v, d+1);
+        for(int k = 0; k + 1 < log_n; ++k) {
+            for(int v = 0; v < n; ++v) {
+                if(parent[k][v] < 0) parent[k + 1][v] = -1;
+                else                 parent[k + 1][v] = parent[k][parent[k][v]];
             }
         }
     }
@@ -49,11 +29,15 @@ public:
         return depth_[v];
     }
 
-    int query(int u, int v) {
+    int dist(int u, int v) const {
+        return depth(u) + depth(v) - 2 * depth(query(u, v));
+    }
+
+    int query(int u, int v) const {
         if(depth_[u] > depth_[v]) {
             std::swap(u, v);
         }
-        for(int k=0; k<log_V; ++k) {
+        for(int k = 0; k < log_n; ++k) {
             if((depth_[v] - depth_[u]) >> k & 1) {
                 v = parent[k][v];
             }
@@ -61,7 +45,7 @@ public:
         if(u == v) {
             return u;
         }
-        for(int k=log_V - 1; k>=0; --k) {
+        for(int k = log_n - 1; k >= 0; --k) {
             if(parent[k][u] != parent[k][v]) {
                 u = parent[k][u];
                 v = parent[k][v];
@@ -71,7 +55,18 @@ public:
     }
 
 private:
-    int V, log_V;
-    std::vector<vector<int>> parent;
+    void dfs(graph const& g, int v, int p, int d) {
+        parent[0][v] = p;
+        depth_[v] = d;
+        for(auto& e : g[v]) {
+            if(e.to != p) {
+                dfs(g, e.to, v, d + 1);
+            }
+        }
+    }
+
+private:
+    int const n, log_n;
+    std::vector<std::vector<int>> parent;
     std::vector<int> depth_;
 };

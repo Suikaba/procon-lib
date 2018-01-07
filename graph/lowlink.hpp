@@ -1,4 +1,3 @@
-
 struct edge {
     int from, to;
 };
@@ -8,14 +7,13 @@ using graph = std::vector<edges>;
 
 class lowlink {
 public:
-    lowlink(graph const& g, int root)
-        : ord(g.size()),
-          low(g.size())
+    lowlink(graph const& g)
+        : ord(g.size()), low(g.size())
     {
         const int N = g.size();
         std::vector<bool> visited(N);
         int cnt = 0;
-        for(int i=0; i<N; ++i) {
+        for(int i = 0; i < N; ++i) {
             if(!visited[i]) {
                 dfs(i, -1, cnt, g, visited);
             }
@@ -28,6 +26,11 @@ public:
 
     std::vector<edge> get_bridges() const {
         return bridges;
+    }
+
+    bool is_bridge(int u, int v) const {
+        if(ord[u] > ord[v]) std::swap(u, v);
+        return ord[u] < low[v];
     }
 
 private:
@@ -48,7 +51,7 @@ private:
                 if(prev != -1 && ord[v] <= low[e.to]) {
                     is_articulation = true;
                 }
-                if(ord[v] < low[e.to]) {
+                if(is_bridge(v, e.to)) {
                     bridges.push_back(edge{min(v, e.to), max(v, e.to)});
                 }
             }
@@ -65,7 +68,5 @@ private:
 private:
     std::vector<int> articulation_points;
     std::vector<edge> bridges;
-    std::vector<int> ord;
-    std::vector<int> low;
+    std::vector<int> ord, low;
 };
-
