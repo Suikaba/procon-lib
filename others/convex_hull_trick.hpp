@@ -14,7 +14,7 @@ class convex_hull_trick {
 
 public:
     convex_hull_trick() = default;
-    // a : sorted sequence
+    // a : sorted sequence, a[i] >= a[i + 1] >= a[i + 2] ...
     convex_hull_trick(std::vector<T> const& a_, std::vector<T> const& b_) {
         assert(a_.size() == b_.size());
         for(int i = 0; i < a_.size(); ++i) {
