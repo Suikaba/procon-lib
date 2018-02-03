@@ -1,11 +1,10 @@
-
 struct alphabets { // example: lower letters
     static int const size = 26;
     static int convert(char c) {
         assert('a' <= c && c <= 'z');
         return c - 'a';
     }
-    static int convert_inv(int i) {
+    static char convert_inv(int i) {
         assert(0 <= i && i < size);
         return 'a' + i;
     }
