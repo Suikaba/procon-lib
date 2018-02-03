@@ -25,4 +25,3 @@ private:
     static const ll mod1 = 999999937LL;
     static const ll mod2 = 1000000007LL;
 };
-

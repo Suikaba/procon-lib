@@ -1,4 +1,3 @@
-
 using weight = int;
 
 struct edge {
@@ -63,5 +62,3 @@ weight min_cost_flow(graph& g, int s, int t, weight f) {
     }
     return res;
 }
-
-

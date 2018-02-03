@@ -1,5 +1,3 @@
-
-// ford-fulkerson
 struct edge {
     int to, cap, rev;
 };
@@ -45,5 +43,3 @@ int max_flow(graph& g, int s, int t) {
     }
 
 }
-
-

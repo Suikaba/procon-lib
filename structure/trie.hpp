@@ -1,4 +1,3 @@
-
 template <typename T, unsigned int B = 32>
 class trie {
 public:
@@ -98,4 +97,3 @@ private:
 private:
     std::unique_ptr<node> root;
 };
-

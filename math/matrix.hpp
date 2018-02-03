@@ -1,5 +1,3 @@
-#include <cassert>
-
 namespace detail {
 
 bool is_zero(double d) {
@@ -25,11 +23,6 @@ public:
           row_(v.size()),
           column_((v.size() == 0 ? 0 : v[0].size()))
     {}
-    matrix(matrix const&) = default;
-    matrix(matrix&&) = default;
-    matrix& operator=(matrix const&) = default;
-    matrix& operator=(matrix&&) = default;
-    ~matrix() = default;
 
     std::vector<T>& operator[](unsigned int i) {
         return v_[i];
@@ -237,11 +230,9 @@ matrix<T> pow(matrix<T> x, long long y) {
 
 
 // LUP factorization(gauss)
-// verified
 // Ax = b
 // note: A must be regular(non-singular)
-// return: x
-//         or size 0 vector (if x does not exist or not unique)
+// return: x or size 0 vector (if x does not exist or not unique)
 vector<double> gauss_jordan(matrix<double>& A, std::vector<double> const& b) {
     const int n = A.row_size();
     matrix<double> B(n, n + 1);
@@ -291,9 +282,7 @@ struct lu_data {
     std::vector<int> pi;
 };
 
-// LU decomposition 
-// A = LU
-// A: n * n
+// A -> LU (A is n * n matrix)
 // Verified
 lu_data lu_decomposition(matrix<double> A) {
     std::vector<int> pi;
@@ -325,15 +314,11 @@ std::vector<double> lu_solve(lu_data LU, std::vector<double> b) {
     for(int i = 0; i < (int)pi.size(); ++i) {
         std::swap(b[i], b[pi[i]]);
     }
-    // set c = Ux
-    // solve Lc = b
-    // (assign: b[i] <- c[i])
     for(int i = 0; i < n; ++i) {
         for(int j = 0; j < i; ++j) {
             b[i] -= A[i][j] * b[j];
         }
     }
-    // solve Ux = c
     for(int i = n - 1; i >= 0; --i) {
         for(int j = i + 1; j < n; ++j) {
             b[i] -= A[i][j] * b[j];
