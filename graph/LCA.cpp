@@ -14,7 +14,7 @@ class lowest_common_ancestor {
 public:
     lowest_common_ancestor(graph const& g, int root)
         : n(g.size()), log_n(std::ceil(std::log2(g.size())) + 1),
-          depth_(n), parent(log_n, std::vector<int>(n, -1))
+          parent(log_n, std::vector<int>(n, -1)), depth_(n)
     {
         dfs(g, root, -1, 0);
         for(int k = 0; k + 1 < log_n; ++k) {

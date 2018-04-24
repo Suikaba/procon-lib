@@ -283,6 +283,22 @@ line separate(point const& p1, point const& p2) {
 }
 
 
+// for triangle
+circle circum_circle(const polygon& poly) {
+    assert(poly.size() == 3);
+    point v1 = poly[1] - poly[0],
+          v2 = poly[2] - poly[0];
+    const ld R = std::abs(poly[2] - poly[1]) / 2 / std::sin(std::abs(std::arg(v1 / v2)));
+
+    point mid1 = (poly[0] + poly[1]) * 0.5L,
+          mid2 = (poly[0] + poly[2]) * 0.5L;
+    line l1(mid1, mid1 + v1 * 0.5L * point(0, 1)),
+         l2(mid2, mid2 + v2 * 0.5L * point(0, 1));
+    
+    return circle(is_ll(l1, l2), R);
+}
+
+
 struct edge {
     int from, to;
     ld cost;

@@ -13,6 +13,7 @@ bool dfs(graph const& g, int v, std::vector<int>& match, std::vector<bool>& used
     return false;
 }
 
+// 入力は2部グラフである必要がある
 int bipartite_matching(graph const& g) {
     const int V = g.size();
     std::vector<int> match(V, -1);
