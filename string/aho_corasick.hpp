@@ -1,91 +1,108 @@
 struct alphabets { // example: lower letters
     static int const size = 26;
     static int convert(char c) {
-        assert('a' <= c && c <= 'z');
-        return c - 'a';
+		assert('a' <= c && c <= 'z');
+		return c - 'a';
     }
     static char convert_inv(int i) {
-        assert(0 <= i && i < size);
-        return 'a' + i;
+		assert(0 <= i && i < size);
+		return 'a' + i;
     }
 };
 
 template <typename Alphabets>
 class aho_corasick {
+    static const int invalid_idx = -1;
+
     struct PMA {
-        int const id;
-        PMA* fail;
-        std::vector<std::unique_ptr<PMA>> next;
-        std::vector<int> accept;
-        PMA(int i) : id(i), fail(), next(Alphabets::size) {}
+        int fail;
+        std::vector<int> next, accept;
+    
+        PMA() : fail(invalid_idx), next(Alphabets::size, invalid_idx) {}
     };
 
 public:
     aho_corasick(std::vector<std::string> const& ts)
-    : K(ts.size()), root(std::make_unique<PMA>(0)) {
-        int idx = 1; // node id
-        root->fail = root.get();
+    : K(ts.size()) {
+        const int root_idx = 0;
+        nodes.push_back(std::make_unique<PMA>()); // root node
+        nodes[root_idx]->fail = root_idx; // root idx
         for(int i = 0; i < K; ++i) {
-            auto t = root.get();
+            int now = root_idx;
             for(auto cc : ts[i]) {
                 int c = Alphabets::convert(cc);
-                if(!t->next[c]) {
-                    t->next[c] = std::make_unique<PMA>(idx++);
+                if(nodes[now]->next[c] == invalid_idx) {
+                    nodes[now]->next[c] = static_cast<int>(nodes.size());
+                    nodes.push_back(std::make_unique<PMA>());
                 }
-                t = t->next[c].get();
+                now = nodes[now]->next[c];
             }
-            t->accept.push_back(i);
+            nodes[now]->accept.push_back(i);
         }
 
-        std::queue<PMA*> que;
+        std::queue<int> que;
         for(int c = 0; c < Alphabets::size; ++c) {
-            if(root->next[c]) {
-                root->next[c]->fail = root.get();
-                que.push(root->next[c].get());
+            if(nodes[root_idx]->next[c] != invalid_idx) {
+                nodes[nodes[root_idx]->next[c]]->fail = root_idx;
+                que.push(nodes[root_idx]->next[c]);
             }
         }
         while(!que.empty()) {
-            auto t = que.front();
+            int now = que.front();
             que.pop();
             for(int c = 0; c < Alphabets::size; ++c) {
-                if(t->next[c]) {
-                    que.push(t->next[c].get());
-                    auto nxt = transition(t->fail, Alphabets::convert_inv(c));
-                    t->next[c]->fail = nxt;
-                    for(auto ac : nxt->accept) {
-                        t->next[c]->accept.push_back(ac);
+                if(nodes[now]->next[c] != invalid_idx) {
+                    que.push(nodes[now]->next[c]);
+                    int nxt = transition(nodes[now]->fail, Alphabets::convert_inv(c));
+                    nodes[nodes[now]->next[c]]->fail = nxt;
+                    for(auto ac : nodes[nxt]->accept) {
+                        nodes[nodes[now]->next[c]]->accept.push_back(ac);
                     }
                 }
             }
         }
     }
 
-    PMA* transition(PMA* node, char cc) {
+    int transition(int node_idx, char cc) {
+        assert(0 <= node_idx && node_idx < static_cast<int>(nodes.size()));
         int c = Alphabets::convert(cc);
-        auto now = node;
-        while(!now->next[c] && now != root.get()) now = now->fail;
-        now = now->next[c].get();
-        if(now == nullptr) now = root.get();
+        int now = node_idx;
+        while(nodes[now]->next[c] == invalid_idx && now != 0) {
+            now = nodes[now]->fail;
+        }
+        now = nodes[now]->next[c];
+        if(now == invalid_idx) now = 0;
         return now;
+    }
+
+    bool is_accept(int node_idx) const {
+        assert(0 <= node_idx && node_idx < static_cast<int>(nodes.size()));
+        return nodes[node_idx]->accept.size() != 0;
+    }
+
+
+    std::vector<int> accept_list(int node_idx) const {
+        assert(0 <= node_idx && node_idx < static_cast<int>(nodes.size()));
+        return nodes[node_idx]->accept;
     }
 
     std::vector<std::vector<int>> match(std::string const& s) {
         std::vector<std::vector<int>> res(K);
-        PMA* now = root.get();
-        for(int i = 0; i < (int)s.size(); ++i) {
+        int now = 0;
+        for(int i = 0; i < static_cast<int>(s.size()); ++i) {
             now = transition(now, s[i]);
-            for(auto k : now->accept) {
+            for(auto k : nodes[now]->accept) {
                 res[k].push_back(i);
             }
         }
         return res;
     }
 
-    PMA* get_root() const {
-        return root.get();
+    int node_size() const {
+        return static_cast<int>(nodes.size());
     }
 
 private:
-    int const K;
-    std::unique_ptr<PMA> root;
+    const int K;
+    std::vector<std::unique_ptr<PMA>> nodes;
 };
