@@ -1,3 +1,4 @@
+// O(E + V)
 std::vector<int> complement_bfs(std::vector<std::vector<int>> const& g, int s) {
     const int n = g.size();
     std::vector<int> dist(n, INF);
@@ -10,17 +11,18 @@ std::vector<int> complement_bfs(std::vector<std::vector<int>> const& g, int s) {
             unused.push_back(i);
         }
     }
+
+    std::vector<int> adj(n, -1);
     while(!que.empty()) {
         int v = que.front().first;
         int d = que.front().second;
         que.pop();
-        std::vector<bool> adj(n);
         for(auto to : g[v]) {
-            adj[to] = true;
+            adj[to] = v;
         }
 
         for(auto it = std::begin(unused); it != std::end(unused); ) {
-            if(!adj[*it]) { // 補グラフ上で隣接しているか？
+            if(adj[*it] != v) { // 補グラフ上で隣接しているか？
                 que.emplace(*it, d + 1);
                 dist[*it] = d + 1;
                 it = unused.erase(it);
