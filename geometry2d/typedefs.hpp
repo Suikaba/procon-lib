@@ -1,4 +1,3 @@
-
 using ld = long double;
 using point = std::complex<ld>;
 using polygon = std::vector<point>;
@@ -48,4 +47,11 @@ struct line {
     line(point a, point b) : a(a), b(b) {}
     line(segment s) : a(s.a), b(s.b) {}
     point a, b;
+};
+
+struct circle {
+    circle() : p(point(0, 0)), r(0) {}
+    circle(point p_, long double r_) : p(p_), r(r_) {}
+    point p;
+    long double r;
 };
