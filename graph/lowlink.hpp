@@ -1,32 +1,20 @@
-struct edge {
-    int from, to;
-};
-
-using edges = std::vector<edge>;
-using graph = std::vector<edges>;
-
-class lowlink {
+class lowlink { // multiple edges ok
 public:
     lowlink(graph const& g)
         : ord(g.size()), low(g.size())
     {
-        const int N = g.size();
-        std::vector<bool> visited(N);
+        const int n = g.size();
+        std::vector<bool> visited(n);
         int cnt = 0;
-        for(int i = 0; i < N; ++i) {
+        for(int i = 0; i < n; ++i) {
             if(!visited[i]) {
-                dfs(i, -1, cnt, g, visited);
+                dfs(g, i, -1, cnt, visited);
             }
         }
     }
 
-    std::vector<int> get_articulation_points() const {
-        return articulation_points;
-    }
-
-    std::vector<edge> get_bridges() const {
-        return bridges;
-    }
+    std::vector<int> get_articulation_points() const { return articulation_points; }
+    std::vector<edge> get_bridges() const            { return bridges; }
 
     bool is_bridge(int u, int v) const {
         if(ord[u] > ord[v]) std::swap(u, v);
@@ -34,19 +22,18 @@ public:
     }
 
 private:
-    void dfs(int v, int prev, int& cnt, graph const& g, std::vector<bool>& visited) {
+    void dfs(graph const& g, int v, int prev, int& cnt, std::vector<bool>& visited) {
         visited[v] = true;
-        ord[v] = cnt++;
-        low[v] = ord[v];
+        low[v] = ord[v] = cnt++;
         bool is_articulation = false;
-        int cnt2 = 0;
+        int cnt2 = 0, pcnt = 0;
 
         for(auto& e : g[v]) {
-            if(e.to != prev && visited[e.to]) {
+            if((e.to != prev || (e.to == prev && pcnt == 1)) && visited[e.to]) {
                 low[v] = min(low[v], ord[e.to]);
             } else if(!visited[e.to]) {
                 cnt2++;
-                dfs(e.to, v, cnt, g, visited);
+                dfs(g, e.to, v, cnt, visited);
                 low[v] = min(low[v], low[e.to]);
                 if(prev != -1 && ord[v] <= low[e.to]) {
                     is_articulation = true;
@@ -55,14 +42,10 @@ private:
                     bridges.push_back(edge{min(v, e.to), max(v, e.to)});
                 }
             }
+            pcnt += e.to == prev;
         }
-
-        if(prev == -1 && cnt2 > 1) {
-            is_articulation = true;
-        }
-        if(is_articulation) {
-            articulation_points.push_back(v);
-        }
+        is_articulation |= (prev == -1 && cnt2 > 1);
+        if(is_articulation) articulation_points.push_back(v);
     }
 
 private:
