@@ -1,15 +1,3 @@
-struct edge {
-    int from, to;
-};
-
-using edges = std::vector<edge>;
-using graph = std::vector<edges>;
-
-void add_edge(graph& g, int from, int to) {
-    g[from].push_back(edge{from, to});
-    g[to].push_back(edge{to, from});
-}
-
 // require: lowlink
 class biconnected_component {
 public:
@@ -22,27 +10,23 @@ public:
         add_component(0);
     }
 
-    graph build_tree() {
+    graph build() { // if not connected, result is forest
         graph res(cmps.size());
         auto bridges = helper.get_bridges();
         for(auto& b : bridges) {
-            int u = belongs_[b.from], v = belongs_[b.to];
-            add_edge(res, u, v);
+            add_edge(res, belongs(b.from), belongs(b.to));
         }
         return res;
     }
 
-    int belongs(int u) const {
-        return belongs_[u];
-    }
+    int belongs(int u) const { return belongs_[u]; }
 
 private:
     void fill_component(int c, int u) {
         cmps[c].emplace_back(u);
         belongs_[u] = c;
         for(auto& e : g[u]) {
-            if(belongs_[e.to] >= 0) continue;
-            if(helper.is_bridge(u, e.to)) continue;
+            if(belongs_[e.to] >= 0 || helper.is_bridge(u, e.to)) continue;
             fill_component(c, e.to);
         }
     }
@@ -53,7 +37,7 @@ private:
     }
 
 private:
-    graph const& g;
+    graph g;
     lowlink helper;
     std::vector<int> belongs_;
     std::vector<std::vector<int>> cmps;
