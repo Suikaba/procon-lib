@@ -1,5 +1,3 @@
-// !! Not verified
-
 struct alphabet_t { // default: 'a' - 'z'
     static constexpr int size = 26;
     static constexpr int char_to_index(char c) {
@@ -20,31 +18,31 @@ class trie {
 public:
     trie() : cnt(0), cnt_subt(0), terminate(false) {}
 
-    void insert(std::string const& s) {
-        if(find(s)) return; // when multiset, comment out this line
+    void insert(std::string const& s, int tag, int idx) {
+        //if(find(s)) return; // when multiset, comment out this line
         auto cur_node = this;
         cur_node->cnt_subt += 1;
         for(int p = 0; p < static_cast<int>(s.size()); ++p) {
             const auto c = Alpha::char_to_index(s[p]);
-            if(!next[c]) next[c] = std::make_unique<trie<Alpha>>();
-            cur_node = next[c].get();
+            if(!cur_node->next[c]) cur_node->next[c] = std::make_unique<trie<Alpha>>();
+            cur_node = cur_node->next[c].get();
             cur_node->cnt_subt += 1;
         }
         cur_node->terminate = true;
         cur_node->cnt += 1;
     }
 
-    bool find(std::string const& s) const {
+    bool find(std::string const& s) const { // Not verified
         auto cur_node = this;
         for(int p = 0; p < static_cast<int>(s.size()); ++p) {
             const auto c = Alpha::char_to_index(s[p]);
-            if(!next[c]) return false;
+            if(!cur_node->next[c]) return false;
             cur_node = next[c].get();
         }
         return cur_node->terminate;
     }
 
-    std::string kth_element(cnt_t k) const { // 1-indexed
+    std::string kth_element(cnt_t k) const { // 1-indexed, Not verified
         assert(cnt_subt >= k);
         k -= cnt;
         while(k > 0) {
@@ -63,4 +61,3 @@ private:
     cnt_t cnt, cnt_subt;
     bool terminate;
 };
-
