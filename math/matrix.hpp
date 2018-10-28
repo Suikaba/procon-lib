@@ -1,194 +1,81 @@
+constexpr double eps = 1e-10;
+
 namespace detail {
-
-bool is_zero(double d) {
-    return (std::abs(d) < 1e-9);
-}
-bool is_zero(long double d) {
-    return (std::abs(d) < 1e-9);
-}
-
+    bool is_zero(double x) {
+        return std::fabs(x) < eps;
+    }
+    bool is_zero(long double x) {
+        return std::fabs(x) < eps;
+    }
 }
 
 template <typename T>
 class matrix {
 public:
-    matrix() = delete;
-    matrix(int r, int c) 
-        : v_(r, std::vector<T>(c)),
-          row_(r),
-          column_(c)
-    {}
-    matrix(std::vector<std::vector<T>> const& v)
-        : v_(v),
-          row_(v.size()),
-          column_((v.size() == 0 ? 0 : v[0].size()))
+    matrix() : matrix(0, 0) {}
+    matrix(int r, int c, T init = T())
+        : a(r, std::vector<T>(c, init)), row_sz(r), col_sz(c)
     {}
 
-    std::vector<T>& operator[](unsigned int i) {
-        return v_[i];
-    }
-    const std::vector<T>& operator[](unsigned int i) const {
-        return v_[i];
-    }
-    matrix& operator+=(matrix const& other) {
-        assert(other.row_size() == row_ && other.column_size() == column_);
-        for(int i = 0; i < row_; ++i) {
-            for(int j = 0; j < column_; ++j) {
-                v_[i][j] += other[i][j];
-            }
-        }
-        return *this;
-    }
-    matrix& operator-=(matrix const& other) {
-        assert(other.row_size() == row_ && other.column_size() == column_);
-        for(int i = 0; i < row_; ++i) {
-            for(int j = 0; j < column_; ++j) {
-                v_[i][j] -= other[i][j];
-            }
-        }
-        return *this;
+    void init(int r, int c) {
+        *this = matrix(r, c);
     }
 
-    bool operator==(matrix const& rhs) const {
-        if(row_ != rhs.row_size() || column_ != rhs.column_size()) {
-            return false;
+    matrix& operator+=(matrix const& that) {
+        assert(row_sz == that.row_size() && col_sz == that.col_size());
+        for(int i = 0; i < row_sz; ++i) {
+            for(int j = 0; j < col_sz; ++j) {
+                a[i][j] += that[i][j];
+            }
         }
-        for(int i = 0; i < row_; ++i) {
-            for(int j = 0; j < column_; ++j) {
-                if(std::abs(v_[i][j] - rhs[i][j]) > 1e-9) {
-                    return false;
+    }
+    matrix& operator-=(matrix const& that) {
+        assert(row_sz == that.row_size() && col_sz == that.col_size());
+        for(int i = 0; i < row_sz; ++i) {
+            for(int j = 0; j < col_sz; ++j) {
+                a[i][j] -= that[i][j];
+            }
+        }
+    }
+    matrix& operator*=(matrix const& that) {
+        assert(col_sz == that.row_size());
+        matrix res(row_sz, that.col_size());
+        for(int i = 0; i < row_sz; ++i) {
+            for(int k = 0; k < that.col_size(); ++k) {
+                for(int j = 0; j < col_sz; ++j) {
+                    res[i][j] += a[i][k] * that[k][j];
                 }
             }
         }
-        return true;
+        return res;
     }
-    bool operator!=(matrix const& rhs) {
-        return !(*this == rhs);
-    }
-
-    int row_size() const {
-        return row_;
-    }
-    int column_size() const {
-        return column_;
-    }
-
-    // for debug
-    void print() {
-        for(int i = 0; i < row_; ++i) {
-            for(int j = 0; j < column_; ++j) {
-                std::cout << v_[i][j];
-                if(j != column_ - 1) {
-                    std::cout << " ";
-                }
+    std::vector<T> operator*(std::vector<T> const& that) {
+        assert(col_sz == (int)that.size());
+        std::vector<T> res(row_sz);
+        for(int i = 0; i < row_sz; ++i) {
+            for(int j = 0; j < col_sz; ++j) {
+                res[i] += a[i][j] * that[j];
             }
-            std::cout << std::endl;
         }
+        return res;
     }
+    matrix operator+(matrix const& that) const { return matrix(*this) += that; }
+    matrix operator-(matrix const& that) const { return matrix(*this) -= that; }
+    matrix operator*(matrix const& that) const { return matrix(*this) *= that; }
+
+    bool operator==(matrix const& that) const { return a == that.a; }
+    bool operator!=(matrix const& that) const { return !(*this == that); }
+
+    std::vector<T>& operator[](size_t i)             { return a[i]; }
+    std::vector<T> const& operator[](size_t i) const { return a[i]; }
+
+    int row_size() const { return row_sz; }
+    int col_size() const { return col_sz; }
 
 private:
-    std::vector<std::vector<T>> v_;
-    int row_, column_;
+    std::vector<std::vector<T>> a;
+    int row_sz, col_sz;
 };
-
-template <typename T>
-matrix<T> operator-(matrix<T> m) {
-    for(int i = 0; i < m.row_size(); ++i) {
-        for(int j = 0; j < m.column_size(); ++j) {
-            m[i][j] = -m[i][j];
-        }
-    }
-}
-
-template <typename T>
-matrix<T> operator+(matrix<T> lhs, matrix<T> const& rhs) {
-    lhs += rhs;
-    return lhs;
-}
-
-template <typename T>
-matrix<T> operator-(matrix<T> lhs, matrix<T> const& rhs) {
-    lhs -= rhs;
-    return lhs;
-}
-
-template <typename T>
-matrix <T> operator*(matrix<T> const& lhs, matrix<T> const& rhs) {
-    assert(lhs.column_size() == rhs.row_size());
-    matrix<T> ret(lhs.row_size(), rhs.column_size());
-    for(int i = 0; i < ret.row_size(); ++i) {
-        for(int k = 0; k < lhs.column_size(); ++k) {
-            for(int j = 0; j < ret.column_size(); ++j) {
-                ret[i][j] += lhs[i][k] * rhs[k][j];
-            }
-        }
-    }
-    return ret;
-}
-
-template <typename T>
-matrix<T> transpose(matrix<T> const& m) {
-    const int R = m.row_size(), C = m.column_size();
-    matrix<T> ret(C, R);
-    for(int i = 0; i < C; ++i) {
-        for(int j = 0; j < R; ++j) {
-            ret[i][j] = m[j][i];
-        }
-    }
-    return ret;
-}
-
-int rank_matrix(matrix<long double> a) {
-    const int R = a.row_size(), C = a.column_size();
-    int r = 0;
-    for(int i = 0; i < C && r < R; ++i) {
-        int pivot = r;
-        for(int j = r + 1; j < R; ++j) {
-            if(std::abs(a[j][i]) > std::abs(a[pivot][i])) {
-                pivot = j;
-            }
-        }
-        std::swap(a[pivot], a[r]);
-        if(detail::is_zero(a[r][i])) {
-            continue;
-        }
-        for(int k = C - 1; k >= i; --k) {
-            a[r][k] = a[r][k] / a[r][i];
-        }
-        for(int j = r + 1; j < R; ++j) {
-            for(int k = C - 1; k >= i; --k) {
-                a[j][k] += -a[r][k] * a[j][i];
-            }
-        }
-        ++r;
-    }
-    return r;
-}
-
-long double det(matrix<long double> a) {
-    assert(a.column_size() == a.row_size());
-    const int R = a.row_size(), C = a.column_size();
-    long double ret = 1.0;
-    for(int i = 0; i < R; ++i) {
-        int pivot = i;
-        for(int j = i + 1; j < R; ++j) {
-            if(std::abs(a[j][i]) > std::abs(a[pivot][i])) {
-                pivot = j;
-            }
-        }
-        std::swap(a[pivot], a[i]);
-        ret *= a[i][i] * (i != pivot ? -1.0 : 1.0);
-        if(detail::is_zero(a[i][i])) {
-            break;
-        }
-        for(int j = i + 1; j < R; ++j) {
-            for(int k = C - 1; k >= i; --k) {
-                a[j][k] -= a[i][k] * a[j][i] / a[i][i];
-            }
-        }
-    }
-    return ret;
-}
 
 template <typename T>
 matrix<T> eye(int n) {
@@ -200,42 +87,63 @@ matrix<T> eye(int n) {
 }
 
 template <typename T>
-matrix<T> mul(matrix<T> const& a, matrix<T> const& b) {
-    const int R = a.row_size(), C = b.column_size();
-    assert(a.column_size() == b.row_size());
-    matrix<T> ret(R, C);
-    for(int i = 0; i < R; ++i) {
-        for(int k = 0; k < a.column_size(); ++k) {
-            for(int j = 0; j < C; ++j) {
-                ret[i][j] += a[i][k] * b[k][j];
+int rank_matrix(matrix<T> a) {
+    const int R = a.row_size(), C = a.col_size();
+    int r = 0;
+    for(int i = 0; i < C && r < R; ++i) {
+        int pivot = r;
+        for(int j = r + 1; j < R; ++j) {
+            if(std::abs(a[j][i]) > std::abs(a[pivot][i])) {
+                pivot = j;
+            }
+        }
+        std::swap(a[pivot], a[r]);
+        if(detail::is_zero(a[r][i])) continue;
+        for(int k = C - 1; k >= i; --k) {
+            a[r][k] = a[r][k] / a[r][i];
+        }
+        for(int j = r + 1; j < R; ++j) {
+            for(int k = C - 1; k >= i; --k) {
+                a[j][k] -= a[r][k] * a[j][i];
+            }
+        }
+        ++r;
+    }
+    return r;
+}
+
+template <typename T> // for double or long double
+T det(matrix<T> a) {
+    assert(a.row_size() == a.col_size());
+    const int n = a.row_size();
+    T res = 1;
+    for(int i = 0; i < n; ++i) {
+        int pivot = i;
+        for(int j = i + 1; j < n; ++j) {
+            if(std::abs(a[j][i]) > std::abs(a[pivot][i])) {
+                pivot = j;
+            }
+        }
+        swap(a[pivot], a[i]);
+        res *= a[i][i] * (i != pivot ? -1.0 : 1.0);
+        if(detail::is_zero(a[i][i])) break;
+        if(res == T(0)) assert(false);
+        for(int j = i + 1; j < n; ++j) {
+            for(int k = n - 1; k >= i; --k) {
+                a[j][k] -= a[i][k] * a[j][i] / a[i][i];
             }
         }
     }
-    return ret;
+    return res;
 }
 
+// solve Ax = b
+// @note: A must be regular(non-singular)
+// @return: x or size 0 vector (when x does not exist or not unique)
 template <typename T>
-matrix<T> pow(matrix<T> x, long long y) {
-    assert(x.column_size() == x.row_size());
-    matrix<T> ret = eye<T>(x.column_size());
-    while(y > 0) {
-        if(y & 1) {
-            ret = ret * x;
-        }
-        x = x * x;
-        y >>= 1;
-    }
-    return ret;
-}
-
-
-// LUP factorization(gauss)
-// Ax = b
-// note: A must be regular(non-singular)
-// return: x or size 0 vector (if x does not exist or not unique)
-vector<double> gauss_jordan(matrix<double>& A, std::vector<double> const& b) {
+std::vector<T> gauss_jordan(matrix<T> const& A, std::vector<T> const& b) {
     const int n = A.row_size();
-    matrix<double> B(n, n + 1);
+    matrix<T> B(n, n + 1);
     for(int i = 0; i < n; ++i) {
         for(int j = 0; j < n; ++j) {
             B[i][j] = A[i][j];
@@ -253,38 +161,37 @@ vector<double> gauss_jordan(matrix<double>& A, std::vector<double> const& b) {
             }
         }
         std::swap(B[i], B[pivot]);
-        if(std::abs(B[i][i]) < 1e-9) {
-            return std::vector<double>();
-        }
+
+        if(detail::is_zero(B[i][i])) return std::vector<T>(); // no solution
 
         for(int j = i + 1; j <= n; ++j) {
             B[i][j] /= B[i][i];
         }
         for(int j = 0; j < n; ++j) {
-            if(i != j) {
-                for(int k = i + 1; k <= n; ++k) {
-                    B[j][k] -= B[j][i] * B[i][k];
-                }
+            if(i == j) continue;
+            for(int k = i + 1; k <= n; ++k) {
+                B[j][k] -= B[j][i] * B[i][k];
             }
         }
     }
 
-    std::vector<double> x(n);
+    std::vector<T> x(n);
     for(int i = 0; i < n; ++i) {
         x[i] = B[i][n];
     }
     return x;
 }
 
-
+template <typename T>
 struct lu_data {
-    matrix<double> A;
+    matrix<T> A;
     std::vector<int> pi;
 };
 
 // A -> LU (A is n * n matrix)
 // Verified
-lu_data lu_decomposition(matrix<double> A) {
+template <typename T>
+lu_data<T> lu_decomposition(matrix<T> A) {
     std::vector<int> pi;
     const int n = A.row_size();
     for(int i = 0; i < n; ++i) {
@@ -303,12 +210,13 @@ lu_data lu_decomposition(matrix<double> A) {
             A[j][i] /= A[i][i];
         }
     }
-    return lu_data{A, pi};
+    return lu_data<T>{A, pi};
 }
 
 // solve Ax = LUx = b
-std::vector<double> lu_solve(lu_data LU, std::vector<double> b) {
-    matrix<double>& A = LU.A;
+template <typename T>
+std::vector<T> lu_solve(lu_data<T> LU, std::vector<T> b) {
+    matrix<T>& A = LU.A;
     std::vector<int> &pi = LU.pi;
     const int n = A.row_size();
     for(int i = 0; i < (int)pi.size(); ++i) {
