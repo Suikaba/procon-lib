@@ -9,57 +9,55 @@ using edges = std::vector<edge>;
 using graph = std::vector<edges>;
 
 class minimum_spanning_arborescence {
+    using node_t = std::pair<weight, int>;
 public:
-    minimum_spanning_arborescence(int V, edges const& es_) : es(V) {
-        for(auto const& e : es_) {
-            es[e.to].push_back(e);
+    minimum_spanning_arborescence(int V, edges const& es) {
+        heaps.reserve(V);
+        for(int i = 0; i < V; ++i) {
+            heaps.emplace_back([] (node_t a, int v) { return node_t{a.first + v, a.second}; });
+        }
+        for(auto const& e : es) {
+            heaps[e.to].push(node_t{e.cost, e.from});
         }
     }
 
     weight solve(int r) {
-        const int n = es.size();
+        const int n = heaps.size();
         weight res = 0;
-        union_find uf(n);              // k–ñó‹µ‚ğ•\‚·
-        std::vector<int> used(n, -1);  // -1: ‚Ü‚¾Œ©‚Ä‚È‚¢, otherwise: ’Tõ‚Ìn“_‚Ì’¸“_”Ô†
-        used[r] = r; // ª‚ÍÅ‰‚ÉŠm’è‚³‚¹‚Ä‚µ‚Ü‚¤
+        union_find uf(n);              // ç¸®ç´„çŠ¶æ³ã‚’è¡¨ã™
+        std::vector<int> used(n, -1);  // -1: ã¾ã è¦‹ã¦ãªã„, otherwise: æ¢ç´¢ã®å§‹ç‚¹ã®é ‚ç‚¹ç•ªå·
+        used[r] = r; // æ ¹ã¯æœ€åˆã«ç¢ºå®šã•ã›ã¦ã—ã¾ã†
         for(int s = 0; s < n; ++s) {
-            std::vector<int> path; // ˆ—’†‚Ì’¸“_W‡‚ğ‚à‚Â
+            std::vector<int> path; // å‡¦ç†ä¸­ã®é ‚ç‚¹é›†åˆã‚’ã‚‚ã¤
             for(int u = s; used[u] == -1;) {
                 path.push_back(u);
                 used[u] = s;
-                if(es[u].empty()) return -1; // ‚»‚à‚»‚àÅ¬—LŒü‘Sˆæ–Ø‚ª‘¶İ‚µ‚È‚¢
-                int use_idx = 0;
-                for(int i = 0; i < (int)es[u].size(); ++i) {
-                    if(es[u][use_idx].cost > es[u][i].cost) {
-                        use_idx = i;
-                    }
-                }
-                auto use_e = es[u][use_idx];
-                es[u].erase(std::begin(es[u]) + use_idx); // g‚Á‚½•Ó‚Ííœ
 
-                // –{—ˆA‚±‚±‚Å©ŒÈ•Ó‚Ö‚Ì‘Îˆ‚ğ‚·‚é•K—v‚ª‚ ‚éB
-                // ‚µ‚©‚µA©ŒÈ•Ó‚ÌƒRƒXƒg‚ğ‘«‚µ‚½ŒãAü•Ó‚Ì•Ó‚ÌƒRƒXƒg‚ğˆÈ‰º‚Ì‚æ‚¤‚É
-                // “¯‚¶•ªŒ¸‚ç‚·‚Ì‚ÅAÀ‚ÍŒ‹‰Ê‚É‰e‹¿‚µ‚È‚¢B
-                // ‚»‚µ‚Ä©ŒÈ•Ó‚Í‚·‚®‚É•Â˜H‚Æ”»’è‚³‚êA‚»‚Ì•Ó‚ªæ‚èœ‚©‚ê‚é‚½‚ßA
-                // –Àã‚±‚ê‚Å©ŒÈ•Ó‚É‘Î‰‚µ‚½‚±‚Æ‚É‚È‚Á‚Ä‚¢‚éB
-                // ƒR[ƒh‚ÌŒ©‚½–Ú‚Æ‚µ‚Ä‚Í‚©‚È‚è•s©‘R‚È‚Ì‚Å’ˆÓ
-                res += use_e.cost;
-                for(auto& e : es[u]) {
-                    e.cost -= use_e.cost;
-                }
+                if(heaps[u].empty()) return -1; // ãã‚‚ãã‚‚æœ€å°æœ‰å‘å…¨åŸŸæœ¨ãŒå­˜åœ¨ã—ãªã„
 
-                int v = uf.root(use_e.from);
-                if(used[v] == s) { // •Â˜H‚ğ”­Œ©
+                auto p = heaps[u].top();
+                heaps[u].pop(); // ä½¿ã£ãŸè¾ºã¯å‰Šé™¤
+
+                // æœ¬æ¥ã€ã“ã“ã§è‡ªå·±è¾ºã¸ã®å¯¾å‡¦ã‚’ã™ã‚‹å¿…è¦ãŒã‚ã‚‹ã€‚
+                // ã—ã‹ã—ã€è‡ªå·±è¾ºã®ã‚³ã‚¹ãƒˆã‚’è¶³ã—ãŸå¾Œã€å‘¨è¾ºã®è¾ºã®ã‚³ã‚¹ãƒˆã‚’ä»¥ä¸‹ã®ã‚ˆã†ã«
+                // åŒã˜åˆ†æ¸›ã‚‰ã™ã®ã§ã€å®Ÿã¯çµæœã«å½±éŸ¿ã—ãªã„ã€‚
+                // ãã—ã¦è‡ªå·±è¾ºã¯ã™ãã«é–‰è·¯ã¨åˆ¤å®šã•ã‚Œã€ãã®è¾ºãŒå–ã‚Šé™¤ã‹ã‚Œã‚‹ãŸã‚ã€
+                // äº‹å®Ÿä¸Šã“ã‚Œã§è‡ªå·±è¾ºã«å¯¾å¿œã—ãŸã“ã¨ã«ãªã£ã¦ã„ã‚‹ã€‚
+                // ã‚³ãƒ¼ãƒ‰ã®è¦‹ãŸç›®ã¨ã—ã¦ã¯ã‹ãªã‚Šä¸è‡ªç„¶ãªã®ã§æ³¨æ„
+                res += p.first;
+                heaps[u].add(-p.first);
+
+                int v = uf.root(p.second);
+                if(used[v] == s) { // é–‰è·¯ã‚’ç™ºè¦‹
                     int w = -1;
-                    std::vector<edge> new_es;
-                    do { // •Â˜H‚ğ‚Ü‚í‚é
+                    lazy_skew_heap<node_t, int> nheap([] (node_t a, int lv) { return node_t{a.first + lv, a.second}; });
+                    do { // é–‰è·¯ã‚’ã¾ã‚ã‚‹
                         w = path.back();
                         path.pop_back();
-                        new_es.insert(std::end(new_es), std::begin(es[w]), std::end(es[w]));
-                        es[w].clear();
+                        nheap.meld(heaps[w]);
                     } while(uf.unite(v, w));
-                    es[uf.root(v)] = std::move(new_es);
-                    used[uf.root(v)] = -1; // Ÿ‚Ìƒ‹[ƒv‚Å‚à‚¤ˆê“x’Tõ‚³‚¹‚é‚½‚ß
+                    heaps[uf.root(v)] = std::move(nheap);
+                    used[uf.root(v)] = -1; // æ¬¡ã®ãƒ«ãƒ¼ãƒ—ã§ã‚‚ã†ä¸€åº¦æ¢ç´¢ã•ã›ã‚‹ãŸã‚
                 }
                 u = uf.root(v);
             }
@@ -69,5 +67,5 @@ public:
     }
 
 private:
-    std::vector<std::vector<edge>> es;
+    std::vector<lazy_skew_heap<node_t, int>> heaps;
 };
