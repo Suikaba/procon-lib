@@ -1,5 +1,4 @@
 using weight = int;
-constexpr weight INF = 1e9;
 
 struct edge {
     int from, to;
@@ -9,82 +8,66 @@ struct edge {
 using edges = std::vector<edge>;
 using graph = std::vector<edges>;
 
-void add_edge(graph& g, int from, int to, weight cost) {
-    g[from].push_back(edge{from, to, cost});
-}
+class minimum_spanning_arborescence {
+public:
+    minimum_spanning_arborescence(int V, edges const& es_) : es(V) {
+        for(auto const& e : es_) {
+            es[e.to].push_back(e);
+        }
+    }
 
-weight minimum_spanning_rooted_arborescence(graph const& g, int root, weight sum = 0) {
-    int const n = g.size();
-    std::vector<int> rev(n, -1), cost(n, INF);
-    for(int i = 0; i < n; ++i) {
-        for(auto& e : g[i]) {
-            if(e.cost < cost[e.to]) {
-                cost[e.to] = e.cost;
-                rev[e.to] = i;
+    weight solve(int r) {
+        const int n = es.size();
+        weight res = 0;
+        union_find uf(n);              // 縮約状況を表す
+        std::vector<int> used(n, -1);  // -1: まだ見てない, otherwise: 探索の始点の頂点番号
+        used[r] = r; // 根は最初に確定させてしまう
+        for(int s = 0; s < n; ++s) {
+            std::vector<int> path; // 処理中の頂点集合をもつ
+            for(int u = s; used[u] == -1;) {
+                path.push_back(u);
+                used[u] = s;
+                if(es[u].empty()) return -1; // そもそも最小有向全域木が存在しない
+                int use_idx = 0;
+                for(int i = 0; i < (int)es[u].size(); ++i) {
+                    if(es[u][use_idx].cost > es[u][i].cost) {
+                        use_idx = i;
+                    }
+                }
+                auto use_e = es[u][use_idx];
+                es[u].erase(std::begin(es[u]) + use_idx); // 使った辺は削除
+
+                // 本来、ここで自己辺への対処をする必要がある。
+                // しかし、自己辺のコストを足した後、周辺の辺のコストを以下のように
+                // 同じ分減らすので、実は結果に影響しない。
+                // そして自己辺はすぐに閉路と判定され、その辺が取り除かれるため、
+                // 事実上これで自己辺に対応したことになっている。
+                // コードの見た目としてはかなり不自然なので注意
+                res += use_e.cost;
+                for(auto& e : es[u]) {
+                    e.cost -= use_e.cost;
+                }
+
+                int v = uf.root(use_e.from);
+                if(used[v] == s) { // 閉路を発見
+                    int w = -1;
+                    std::vector<edge> new_es;
+                    do { // 閉路をまわる
+                        w = path.back();
+                        path.pop_back();
+                        new_es.insert(std::end(new_es), std::begin(es[w]), std::end(es[w]));
+                        es[w].clear();
+                    } while(uf.unite(v, w));
+                    es[uf.root(v)] = std::move(new_es);
+                    used[uf.root(v)] = -1; // 次のループでもう一度探索させるため
+                }
+                u = uf.root(v);
             }
         }
-    }
-    for(int i = 0; i < n; ++i) {
-        if(i != root && rev[i] == -1) { // not exists
-            return INF;
-        }
+
+        return res;
     }
 
-    graph g2(n);
-    for(int i = 0; i < n; ++i) {
-        if(root == i) {
-            continue;
-        }
-        g2[rev[i]].push_back(edge{rev[i], i, 0}); // ignore cost
-        sum += cost[i];
-    }
-    std::vector<int> cmp(n);
-    int const K = scc(g2, cmp);
-    auto nxt = build_graph(g2, cmp, K);
-    if(nxt.size() == n) {
-        return sum;
-    }
-
-    graph ng(nxt.size());
-    for(int i = 0; i < n; ++i) {
-        for(auto& e : g[i]) {
-            if(cmp[i] == cmp[e.to]) {
-                continue;
-            }
-            ng[cmp[i]].push_back(edge{cmp[i], cmp[e.to], e.cost - cost[e.to]});
-        }
-    }
-    return minimum_spanning_rooted_arborescence(ng, cmp[root], sum);
-}
-
-// not verified
-weight maximum_branching(graph const& g) {
-    graph g2(g.size() + 1);
-    int const super = g.size();
-    for(int i = 0; i < (int)g.size(); ++i) {
-        for(auto& e : g[i]) {
-            add_edge(g2, e.from, e.to, -e.cost);
-        }
-        add_edge(g2, super, i, 0);
-    }
-    return -minimum_spanning_rooted_arborescence(g2, super);
-}
-
-// not verified
-weight minimum_spanning_arborescence(graph const& g) {
-    weight K = 1;
-    int const n = g.size();
-    for(int i = 0; i < n; ++i) {
-        for(auto& e : g[i]) {
-            K += std::abs(e.cost);
-        }
-    }
-
-    auto g2 = g;
-    for(int i = 0; i < n; ++i) {
-        for(auto& e : g2[i]) {
-            e.cost = K - e.cost;
-        }
-    }
-    return K * (n - 1) - maximum_branching(g2);
-}
+private:
+    std::vector<std::vector<edge>> es;
+};
