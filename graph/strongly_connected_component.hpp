@@ -1,33 +1,23 @@
-struct edge {
-    int from, to;
-};
-
-using edges = std::vector<edge>;
-using graph = std::vector<edges>;
-
-void add_edge(graph& g, int from, int to) {
-    g[from].push_back(edge{from, to});
-}
-
 class strongly_connected_component {
+    using graph = std::vector<std::vector<int>>;
 public:
-    strongly_connected_component(graph const& G) 
-    : g(G), cmp(G.size()), K(0) {
-        int const V = G.size();
-        std::vector<std::vector<int>> rg(V);
-        for(int v = 0; v < V; ++v) {
-            for(auto& e : g[v]) {
-                rg[e.to].push_back(v);
-            }
-        }
-        std::vector<bool> used(V);
-        for(int v = 0; v < V; ++v) {
+    strongly_connected_component(int n) : g(n), rg(n), cmp(n), K(0) {}
+
+    void add_edge(int s, int t) {
+        g[s].push_back(t);
+        rg[t].push_back(s);
+    }
+
+    void build() {
+        const int n = g.size();
+        std::vector<bool> used(n);
+        for(int v = 0; v < n; ++v) {
             if(!used[v]) dfs(v, used);
         }
         std::fill(std::begin(used), std::end(used), false);
         int k = 0;
         for(int i = (int)vs.size() - 1; i >= 0; --i) {
-            if(!used[vs[i]]) rdfs(vs[i], k++, rg, used);
+            if(!used[vs[i]]) rdfs(vs[i], k++, used);
         }
         K = k;
     }
@@ -36,16 +26,17 @@ public:
         return cmp[v];
     }
 
-    std::vector<std::vector<int>> build_graph() const {
+    graph build_graph() { // also call build()
+        build();
         int const V = g.size();
         std::vector<std::set<int>> s(K);
-        std::vector<std::vector<int>> res(K);
+        graph res(K);
         for(int v = 0; v < V; ++v) {
-            for(auto& e : g[v]) {
-                s[cmp[v]].insert(cmp[e.to]);
+            for(const auto to : g[v]) {
+                s[cmp[v]].insert(cmp[to]);
             }
         }
-        for(int i = 0; i < K; ++i) {
+        for(int i = 0; i < K; ++i) { // remove self-loop edge
             for(auto j : s[i]) {
                 if(i != j) res[i].push_back(j);
             }
@@ -56,21 +47,21 @@ public:
 private:
     void dfs(int v, std::vector<bool>& used) {
         used[v] = true;
-        for(auto& e : g[v]) {
-            if(!used[e.to]) dfs(e.to, used);
+        for(const auto to : g[v]) {
+            if(!used[to]) dfs(to, used);
         }
         vs.push_back(v);
     }
-    void rdfs(int v, int k, std::vector<std::vector<int>> const& rg, std::vector<bool>& used) {
+    void rdfs(int v, int k, std::vector<bool>& used) {
         used[v] = true;
         cmp[v] = k;
         for(auto to : rg[v]) {
-            if(!used[to]) rdfs(to, k, rg, used);
+            if(!used[to]) rdfs(to, k, used);
         }
     }
 
 private:
-    graph const& g;
+    graph g, rg;
     std::vector<int> cmp, vs;
     int K;
 };
