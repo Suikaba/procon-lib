@@ -1,3 +1,5 @@
+using ll = long long;
+
 ll mod_inv(ll a, ll m) {
     ll b = m, u = 1, v = 0;
     while(b > 0) {
@@ -8,17 +10,17 @@ ll mod_inv(ll a, ll m) {
     return (u % m + m) % m;
 }
 
+// solve: find x which statisfies (x mod m[i]) == u[i]
+// require: m[i] are co-prime
 ll garner(std::vector<ll> m, std::vector<ll> u, int mod) {
     const int n = m.size();
     std::vector<ll> inv_prod(n);
-    {
-        for(int i = 1; i < n; ++i) {
-            ll prod = m[0] % m[i];
-            for(int j = 1; j < i; ++j) {
-                prod = (prod * m[j]) % m[i];
-            }
-            inv_prod[i] = mod_inv(prod, m[i]);
+    for(int i = 1; i < n; ++i) {
+        ll prod = m[0] % m[i];
+        for(int j = 1; j < i; ++j) {
+            prod = (prod * m[j]) % m[i];
         }
+        inv_prod[i] = mod_inv(prod, m[i]);
     }
 
     std::vector<ll> v(n);
