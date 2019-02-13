@@ -118,3 +118,31 @@ public:
     }
 };
 
+
+template <typename Capacity, typename Cost>
+class capacity_weighted_edge {
+public:
+    using capacity_type = Capacity;
+    using cost_type = Cost;
+    int to, rev;
+    capacity_type cap;
+    cost_type cost;
+    capacity_weighted_edge(int t, int r, capacity_type cp, cost_type c)
+        : to(t), rev(r), cap(cp), cost(c)
+    {}
+};
+
+template <typename Capacity, typename Cost>
+class capacity_weighted_graph : public graph<capacity_weighted_edge<Capacity, Cost>> {
+    using base_type = graph<capacity_weighted_edge<Capacity, Cost>>;
+public:
+    capacity_weighted_graph(int n) : base_type(n) {}
+
+    using base_type::add_edge;
+    using base_type::edge_size;
+    void add_edge(int from, int to, Capacity cap, Cost cost) {
+        add_edge(from, capacity_weighted_edge<Capacity, Cost>{to, edge_size(to), cap, cost});
+        add_edge(to, capacity_weighted_edge<Capacity, Cost>{from, edge_size(from) - 1, Capacity{0}, -cost});
+    }
+};
+
