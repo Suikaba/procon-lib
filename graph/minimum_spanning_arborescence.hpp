@@ -1,71 +1,145 @@
-using weight = int;
 
-struct edge {
-    int from, to;
-    weight cost;
-};
+// for lazy add.
+// If you need more efficiency, use node pool.
+template <typename T>
+class lazy_skew_heap {
+    struct node {
+        std::pair<T, int> val; // (val, node_idx)
+        T lazy;
+        std::unique_ptr<node> l, r;
+        node(std::pair<T, int> v) : val(v), lazy(0) {}
+    };
+    using node_ptr = std::unique_ptr<node>;
 
-using edges = std::vector<edge>;
-using graph = std::vector<edges>;
-
-class minimum_spanning_arborescence {
-    using node_t = std::pair<weight, int>;
 public:
-    minimum_spanning_arborescence(int V, edges const& es) {
-        heaps.reserve(V);
-        for(int i = 0; i < V; ++i) {
-            heaps.emplace_back([] (node_t a, int v) { return node_t{a.first + v, a.second}; });
-        }
-        for(auto const& e : es) {
-            heaps[e.to].push(node_t{e.cost, e.from});
-        }
+    void meld(lazy_skew_heap& other) {
+        root = meld(std::move(root), std::move(other.root));
     }
 
-    weight solve(int r) {
-        const int n = heaps.size();
-        weight res = 0;
-        union_find uf(n);              // 縮約状況を表す
-        std::vector<int> used(n, -1);  // -1: まだ見てない, otherwise: 探索の始点の頂点番号
-        used[r] = r; // 根は最初に確定させてしまう
-        for(int s = 0; s < n; ++s) {
-            std::vector<int> path; // 処理中の頂点集合をもつ
-            for(int u = s; used[u] == -1;) {
-                path.push_back(u);
-                used[u] = s;
+    void push(std::pair<T, int> val) {
+        root = meld(std::move(root), std::make_unique<node>(val));
+    }
 
-                if(heaps[u].empty()) return -1; // そもそも最小有向全域木が存在しない
+    void add(T val) {
+        if(!root) return;
+        root->lazy += val;
+    }
 
-                auto p = heaps[u].top();
-                heaps[u].pop(); // 使った辺は削除
+    std::pair<T, int> top() const {
+        return std::make_pair(root->val.first + root->lazy, root->val.second);
+    }
 
-                // 本来、ここで自己辺への対処をする必要がある。
-                // しかし、自己辺のコストを足した後、周辺の辺のコストを以下のように
-                // 同じ分減らすので、実は結果に影響しない。
-                // そして自己辺はすぐに閉路と判定され、その辺が取り除かれるため、
-                // 事実上これで自己辺に対応したことになっている。
-                // コードの見た目としてはかなり不自然なので注意
-                res += p.first;
-                heaps[u].add(-p.first);
+    void pop() {
+        push_lazy(root.get());
+        root = meld(std::move(root->r), std::move(root->l));
+    }
 
-                int v = uf.root(p.second);
-                if(used[v] == s) { // 閉路を発見
-                    int w = -1;
-                    lazy_skew_heap<node_t, int> nheap([] (node_t a, int lv) { return node_t{a.first + lv, a.second}; });
-                    do { // 閉路をまわる
-                        w = path.back();
-                        path.pop_back();
-                        nheap.meld(heaps[w]);
-                    } while(uf.unite(v, w));
-                    heaps[uf.root(v)] = std::move(nheap);
-                    used[uf.root(v)] = -1; // 次のループでもう一度探索させるため
-                }
-                u = uf.root(v);
-            }
-        }
-
-        return res;
+    bool empty() const {
+        return !root;
     }
 
 private:
-    std::vector<lazy_skew_heap<node_t, int>> heaps;
+    node_ptr meld(node_ptr a, node_ptr b) {
+        using std::swap;
+        if(!a) return b;
+        if(!b) return a;
+        if(a->val.first + a->lazy > b->val.first + b->lazy) swap(a, b);
+        push_lazy(a.get());
+        a->r = meld(std::move(a->r), std::move(b));
+        swap(a->l, a->r);
+        return a;
+    }
+
+    void push_lazy(node* n) {
+        if(n->l) n->l->lazy += n->lazy;
+        if(n->r) n->r->lazy += n->lazy;
+        n->val.first += n->lazy;
+        n->lazy = 0;
+    }
+
+private:
+    node_ptr root;
 };
+
+
+class union_find {
+public:
+    union_find(int n) : par(n, -1) {}
+
+    int root(int x) {
+        return par[x] < 0 ? x : par[x] = root(par[x]);
+    }
+
+    bool unite(int x, int y) {
+        x = root(x), y = root(y);
+        if(x == y) return false;
+        if(par[x] > par[y]) std::swap(x, y);
+        par[x] += par[y];
+        par[y] = x;
+        return true;
+    }
+
+    bool same(int x, int y) {
+        return root(x) == root(y);
+    }
+
+    int size(int x) {
+        return -par[root(x)];
+    }
+
+private:
+    std::vector<int> par;
+};
+
+
+// Calculate Minimum Spanning Arborescence cost.
+// @param g: weighted (directed) graph
+// @param root: root
+// @return MSA cost (when msa do no exist, return -1)
+// @complexity O(E log V)
+template <typename Edge, typename Cost = typename Edge::cost_type>
+Cost msa(graph<Edge> const& g, const int root) {
+    const int n = g.size();
+    std::vector<lazy_skew_heap<Cost>> heaps(n);
+    for(int v = 0; v < n; ++v) {
+        for(auto const& e : g[v]) {
+            heaps[e.to].push(std::make_pair(e.cost, v));
+        }
+    }
+
+    Cost res = 0;
+    union_find uf(n); // represents contraction of graph
+    std::vector<int> used(n, -1); // -1: not checked, otherwise: vertex where search started
+    used[root] = root;
+    for(int s = 0; s < n; ++s) {
+        std::vector<int> path; // vertex set on process
+        for(int u = s; used[u] == -1;) {
+            path.push_back(u);
+            used[u] = s;
+
+            if(heaps[u].empty()) return -1; // MSA not exists
+
+            auto p = heaps[u].top();
+            heaps[u].pop(); // erase used edge
+            // note: Even for self-loop edge, below 2 line is ok
+            res += p.first;
+            heaps[u].add(-p.first);
+
+            const int v = uf.root(p.second);
+            if(used[v] == s) { // found cycle
+                int w = -1;
+                lazy_skew_heap<Cost> nheap;
+                do { // move on cycle
+                    w = path.back();
+                    path.pop_back();
+                    nheap.meld(heaps[w]);
+                } while(uf.unite(v, w));
+                heaps[uf.root(v)] = std::move(nheap);
+                used[uf.root(v)] = -1; // uf.root(v) need one more search
+            }
+            u = uf.root(v);
+        }
+    }
+    return res;
+}
+
