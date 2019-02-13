@@ -1,5 +1,5 @@
 
-// Djikstra algorithm.
+// Dijkstra algorithm.
 // Solve single source shortest path problem.
 // @param g: weighted graph
 // @param s: source vertex index
@@ -7,7 +7,7 @@
 // @complexity O(E log V)
 // @requirement: none of edges in graph g have negative cost
 template <typename Edge, typename Cost = typename Edge::cost_type>
-std::vector<Cost> djikstra(graph<Edge> const& g, int s, Cost inf = std::numeric_limits<Cost>::max() / 2) {
+std::vector<Cost> dijkstra(graph<Edge> const& g, int s, Cost inf = std::numeric_limits<Cost>::max() / 2) {
     std::vector<Cost> d(g.size(), inf);
     d[s] = Cost(0);
     using state = std::pair<Cost, int>;
