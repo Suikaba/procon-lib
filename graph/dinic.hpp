@@ -1,47 +1,11 @@
 
-using weight = int;
-
-struct edge {
-    int to;
-    weight cap;
-    int rev;
-};
-
-using edges = std::vector<edge>;
-using graph = std::vector<edges>;
-
-void add_edge(graph& g, int from, int to, weight cap) {
-    g[from].push_back(edge{to, cap, static_cast<int>(g[to].size())});
-    g[to].push_back(edge{from, 0, static_cast<int>(g[from].size()-1)});
-}
-
-void bfs(graph& g, std::vector<int>& level, int s) {
-    for(int i = 0; i < (int)level.size(); ++i) {
-        level[i] = -1;
-    }
-    level[s] = 0;
-    std::queue<int> que;
-    que.push(s);
-    while(!que.empty()) {
-        int v = que.front(); que.pop();
-        for(int i = 0; i < (int)g[v].size(); ++i) {
-            edge& e = g[v][i];
-            if(e.cap > 0 && level[e.to] < 0) {
-                level[e.to] = level[v] + 1;
-                que.push(e.to);
-            }
-        }
-    }
-}
-
-weight dfs(graph& g, std::vector<int>& level, std::vector<int>& iter, int v, int t, weight f) {
-    if(v == t) {
-        return f;
-    }
-    for(int& i = iter[v]; i < (int)g[v].size(); ++i) {
-        edge& e = g[v][i];
+template <typename Edge, typename Capacity = typename Edge::capacity_type>
+Capacity augment(graph<Edge>& g, std::vector<int> level, std::vector<int>& iter, int v, int t, Capacity f) {
+    if(v == t) return f;
+    for(int i = iter[v]; i < (int)g[v].size(); ++i) {
+        auto& e = g[v][i];
         if(e.cap > 0 && level[v] < level[e.to]) {
-            weight d = dfs(g, level, iter, e.to, t, std::min(f, e.cap));
+            const auto d = augment(g, level, iter, e.to, t, std::min(f, e.cap));
             if(d > 0) {
                 e.cap -= d;
                 g[e.to][e.rev].cap += d;
@@ -52,21 +16,30 @@ weight dfs(graph& g, std::vector<int>& level, std::vector<int>& iter, int v, int
     return 0;
 }
 
-weight max_flow(graph& g, int s, int t) {
-    weight flow = 0;
-    std::vector<int> level(g.size(), -1);
-    std::vector<int> iter(g.size(), 0);
-    weight INF = 1e9;
+template <typename Edge, typename Capacity = typename Edge::capacity_type>
+Capacity max_flow(graph<Edge>& g, int s, int t) {
+    const auto inf = std::numeric_limits<Capacity>::max() / 2;
+    Capacity flow = 0;
     while(true) {
-        bfs(g, level, s);
-        if(level[t] < 0) {
-            return flow;
+        std::vector<int> level(g.size(), -1);
+        level[s] = 0;
+        std::queue<int> que;
+        que.push(s);
+        while(!que.empty()) {
+            const int v = que.front();
+            que.pop();
+            for(auto const& e : g[v]) {
+                if(e.cap > 0 && level[e.to] < 0) {
+                    level[e.to] = level[v] + 1;
+                    que.push(e.to);
+                }
+            }
         }
-        for(int i = 0; i < (int)iter.size(); ++i) {
-            iter[i] = 0;
-        }
-        weight f;
-        while((f = dfs(g, level, iter, s, t, INF)) > 0) {
+
+        if(level[t] < 0) return flow;
+        std::vector<int> iter(g.size());
+        Capacity f{0};
+        while((f = augment(g, level, iter, s, t, inf)) > 0) {
             flow += f;
         }
     }
