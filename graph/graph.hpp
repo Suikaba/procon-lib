@@ -95,3 +95,26 @@ public:
         add_edge(from, weighted_edge<Cost>{to, cost});
     }
 };
+
+
+template <typename Capacity>
+class capacity_edge {
+public:
+    using capacity_type = Capacity;
+    int to, rev;
+    capacity_type cap;
+    capacity_edge(int t, int r, capacity_type c) : to(t), rev(r), cap(c) {}
+};
+
+template <typename Capacity>
+class capacity_graph : public graph<capacity_edge<Capacity>> {
+    using base_type = graph<capacity_edge<Capacity>>;
+public:
+    capacity_graph(int n) : base_type(n) {}
+    using base_type::add_edge;
+    void add_edge(int from, int to, Capacity cap) {
+        add_edge(from, capacity_edge<Capacity>{to, this->edge_size(to), cap});
+        add_edge(to, capacity_edge<Capacity>{from, this->edge_size(from) - 1, Capacity{0}});
+    }
+};
+
