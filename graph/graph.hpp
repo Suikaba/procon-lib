@@ -51,6 +51,26 @@ public:
     }
 };
 
+
+class bidirected_edge {
+public:
+    bidirected_edge(int f, int t) : from(f), to(t) {}
+
+    int from, to;
+};
+
+class bidirected_graph : public graph<bidirected_edge> {
+public:
+    bidirected_graph(int n) : graph(n) {}
+
+    using graph::add_edge;
+    void add_edge(int u, int v) {
+        add_edge(u, bidirected_edge{u, v});
+        add_edge(v, bidirected_edge{v, u});
+    }
+};
+
+
 template <typename Cost>
 class weighted_edge {
 public:
