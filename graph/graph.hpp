@@ -15,7 +15,9 @@ public:
     const_reference operator[](int x) const { return g[x]; }
 
     iterator begin() { return std::begin(g); }
+    const_iterator begin() const { return std::begin(g); }
     iterator end() { return std::end(g); }
+    const_iterator end() const { return std::end(g); }
     reverse_iterator rbegin() { return std::rbegin(g); }
     reverse_iterator rend() { return std::rend(g); }
 
