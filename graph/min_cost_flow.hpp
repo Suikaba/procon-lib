@@ -1,12 +1,11 @@
 
-template <typename Edge,
-          typename Capacity = typename Edge::capacity_type,
-          typename Cost = typename Edge::cost_type>
-Cost min_cost_flow(graph<Edge>& g, int s, int t, Capacity f) {
-    using P = std::pair<Cost, int>;
-    const Cost inf = std::numeric_limits<Cost>::max() / 2;
-    Cost res = 0;
-    std::vector<Cost> h(g.size()), dist(g.size());
+template <typename Edge>
+typename Edge::cost_type min_cost_flow(graph<Edge>& g, int s, int t, typename Edge::capacity_type f) {
+    using cost_type = typename Edge::cost_type;
+    using P = std::pair<cost_type, int>;
+    const auto inf = std::numeric_limits<cost_type>::max() / 2;
+    cost_type res = 0;
+    std::vector<cost_type> h(g.size()), dist(g.size());
     std::vector<int> prevv(g.size()), preve(g.size());
     while(f > 0) {
         std::priority_queue<P, std::vector<P>, std::greater<>> que;
