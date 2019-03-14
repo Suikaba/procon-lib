@@ -1,3 +1,4 @@
+
 template <typename Edge>
 class graph {
     using graph_t = std::vector<std::vector<Edge>>;
@@ -27,79 +28,59 @@ public:
         g.push_back(std::move(es));
     }
 
-    void add_edge(int node_idx, Edge e) {
-        g[node_idx].push_back(std::move(e));
-    }
-
 private:
     std::vector<std::vector<Edge>> g;
 };
 
-
-class directed_edge {
-public:
+// ============================================================================
+// directed graph
+struct directed_edge {
     directed_edge(int t) : to(t) {}
-
     int to;
 };
 
-class directed_graph : public graph<directed_edge> {
-public:
-    directed_graph(int n) : graph(n) {}
+using directed_graph = graph<directed_edge>;
 
-    using graph::add_edge;
-    void add_edge(int from, int to) {
-        add_edge(from, directed_edge{to});
-    }
-};
+void add_edge(directed_graph& g, int from, int to) {
+    g[from].emplace_back(to);
+}
 
-
-class bidirected_edge {
-public:
+// ============================================================================
+// bidirected graph
+struct bidirected_edge {
     bidirected_edge(int f, int t) : from(f), to(t) {}
-
     int from, to;
 };
 
-class bidirected_graph : public graph<bidirected_edge> {
-public:
-    bidirected_graph(int n) : graph(n) {}
+using bidirected_graph = graph<bidirected_edge>;
 
-    using graph::add_edge;
-    void add_edge(int u, int v) {
-        add_edge(u, bidirected_edge{u, v});
-        add_edge(v, bidirected_edge{v, u});
-    }
-};
+void add_edge(bidirected_graph& g, int u, int v) {
+    g[u].emplace_back(u, v);
+    g[v].emplace_back(v, u);
+}
 
-
+// ============================================================================
+// weighted graph (directed)
 template <typename Cost>
-class weighted_edge {
-public:
+struct weighted_edge {
     using cost_type = Cost;
-
     weighted_edge(int t, Cost c) : to(t), cost(c) {}
-
     int to;
     cost_type cost;
 };
 
 template <typename Cost>
-class weighted_graph : public graph<weighted_edge<Cost>> {
-    using base_t = graph<weighted_edge<Cost>>;
-public:
-    weighted_graph(int n) : base_t(n) {}
+using weighted_graph = graph<weighted_edge<Cost>>;
 
-    using base_t::add_edge;
-    void add_edge(int from, int to, Cost cost) {
-        add_edge(from, weighted_edge<Cost>{to, cost});
-    }
-};
+template <typename Cost>
+void add_edge(weighted_graph<Cost>& g, int from, int to, Cost cost) {
+    g[from].emplace_back(to, cost);
+}
 
-
+// ============================================================================
+// capacity graph (for maximum flow)
 template <typename Capacity>
-class capacity_edge {
-public:
+struct capacity_edge {
     using capacity_type = Capacity;
     int to, rev;
     capacity_type cap;
@@ -107,21 +88,18 @@ public:
 };
 
 template <typename Capacity>
-class capacity_graph : public graph<capacity_edge<Capacity>> {
-    using base_type = graph<capacity_edge<Capacity>>;
-public:
-    capacity_graph(int n) : base_type(n) {}
-    using base_type::add_edge;
-    void add_edge(int from, int to, Capacity cap) {
-        add_edge(from, capacity_edge<Capacity>{to, this->edge_size(to), cap});
-        add_edge(to, capacity_edge<Capacity>{from, this->edge_size(from) - 1, Capacity{0}});
-    }
-};
+using capacity_graph = graph<capacity_edge<Capacity>>;
 
+template <typename Capacity>
+void add_edge(capacity_graph<Capacity>& g, int from, int to, Capacity cap) {
+    g[from].emplace_back(to, static_cast<int>(g[to].size()), cap);
+    g[to].emplace_back(from, static_cast<int>(g[from].size() - 1), Capacity{0});
+}
 
+// ============================================================================
+// capacity weighted graph (for minimum cost flow)
 template <typename Capacity, typename Cost>
-class capacity_weighted_edge {
-public:
+struct capacity_weighted_edge {
     using capacity_type = Capacity;
     using cost_type = Cost;
     int to, rev;
@@ -133,16 +111,10 @@ public:
 };
 
 template <typename Capacity, typename Cost>
-class capacity_weighted_graph : public graph<capacity_weighted_edge<Capacity, Cost>> {
-    using base_type = graph<capacity_weighted_edge<Capacity, Cost>>;
-public:
-    capacity_weighted_graph(int n) : base_type(n) {}
+using capacity_weighted_graph = graph<capacity_weighted_edge<Capacity, Cost>>;
 
-    using base_type::add_edge;
-    using base_type::edge_size;
-    void add_edge(int from, int to, Capacity cap, Cost cost) {
-        add_edge(from, capacity_weighted_edge<Capacity, Cost>{to, edge_size(to), cap, cost});
-        add_edge(to, capacity_weighted_edge<Capacity, Cost>{from, edge_size(from) - 1, Capacity{0}, -cost});
-    }
-};
-
+template <typename Capacity, typename Cost>
+void add_edge(capacity_weighted_graph<Capacity, Cost>& g, int from, int to, Capacity cap, Cost cost) {
+    g[from].emplace_back(to, static_cast<int>(g[to].size()), cap, cost);
+    g[to].emplace_back(from, static_cast<int>(g[from].size() - 1), Capacity{0}, -cost);
+}
