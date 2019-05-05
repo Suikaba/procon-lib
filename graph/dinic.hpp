@@ -1,8 +1,8 @@
 
 template <typename Edge, typename Capacity = typename Edge::capacity_type>
-Capacity augment(graph<Edge>& g, std::vector<int> level, std::vector<int>& iter, int v, int t, Capacity f) {
+Capacity augment(graph<Edge>& g, std::vector<int> const& level, std::vector<int>& iter, int v, int t, Capacity f) {
     if(v == t) return f;
-    for(int i = iter[v]; i < (int)g[v].size(); ++i) {
+    for(int& i = iter[v]; i < (int)g[v].size(); ++i) {
         auto& e = g[v][i];
         if(e.cap > 0 && level[v] < level[e.to]) {
             const auto d = augment(g, level, iter, e.to, t, std::min(f, e.cap));
